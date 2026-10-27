@@ -1,0 +1,30 @@
+'use client'
+
+import TopHeader from '@/components/TopHeader'
+import BottomNav from '@/components/BottomNav'
+import KPISalesOverview from '@/components/KPISalesOverview'
+
+export default function SalesPage() {
+  return (
+    <div className="min-h-screen flex flex-col bg-transparent selection:bg-[#FFEDA8] selection:text-[#322A5E]">
+      <TopHeader />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 space-y-6">
+        <div className="flex items-center justify-between pb-3 border-b border-[#DED9F4]/70">
+          <div>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#322A5E]">
+              Sales
+            </h1>
+            <p className="text-xs text-[#7B739B] mt-0.5">
+              Performa closing tim sales, pencapaian omset, dan analisis deal
+            </p>
+          </div>
+        </div>
+
+        <KPISalesOverview />
+      </main>
+
+      <BottomNav />
+    </div>
+  )
+}

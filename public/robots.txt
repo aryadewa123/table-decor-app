@@ -1,0 +1,11 @@
+# https://www.robotstxt.org/
+
+User-agent: *
+Disallow: /api/
+Disallow: /login
+Disallow: /verify-token
+Disallow: /_next/*
+Disallow: /static/*
+Disallow: /auth/callback
+
+Sitemap: /sitemap.xml
