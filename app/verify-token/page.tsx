@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
-export default function VerifyTokenPage() {
+function VerifyTokenForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isAuthenticated } = useAuth()
@@ -111,5 +111,21 @@ export default function VerifyTokenPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyTokenPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+          <div className="w-full max-w-md text-center">
+            <p className="text-sm text-[#7B739B]">Memuat...</p>
+          </div>
+        </div>
+      }
+    >
+      <VerifyTokenForm />
+    </Suspense>
   )
 }
