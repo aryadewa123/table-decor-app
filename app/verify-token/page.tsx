@@ -1,23 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 
 export default function VerifyTokenPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isAuthenticated } = useAuth()
 
   const [token, setToken] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Get callback URL from cookie (set by middleware)
-  const getCallbackUrl = () => {
-    const match = document.cookie.match(/callbackUrl=([^;]+)/)
-    return match ? decodeURIComponent(match[1]) : '/'
-  }
+  const rawNext = searchParams.get('next') || '/'
+  const safeNext = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/'
 
   // If no user, redirect to login
   useEffect(() => {
@@ -32,29 +30,24 @@ export default function VerifyTokenPage() {
     setIsLoading(true)
 
     try {
-      const { data: isValid, error: rpcError } = await supabase.rpc('verify_token', {
-        p_token: token
+      const res = await fetch('/api/verify-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+        credentials: 'include',
       })
 
-      if (rpcError) {
-        setError(rpcError.message || 'Token verifikasi gagal')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'Token tidak valid. Silakan coba lagi.')
         setIsLoading(false)
         return
       }
 
-      if (isValid) {
-        // Set token verified cookie and redirect
-        const isProduction = process.env.NODE_ENV === 'production'
-        const secureFlag = isProduction ? '; Secure' : ''
-        document.cookie = `token_verified=1; path=/; max-age=31536000; SameSite=Lax${secureFlag}`
-        // Clear callbackUrl cookie after use
-        document.cookie = 'callbackUrl=; path=/; max-age=0; SameSite=Lax'
-        router.replace(getCallbackUrl())
-      } else {
-        setError('Token tidak valid. Silakan coba lagi.')
-        setIsLoading(false)
-      }
-    } catch (err) {
+      router.replace(safeNext)
+    } catch {
       setError('Terjadi kesalahan. Coba lagi nanti.')
       setIsLoading(false)
     }

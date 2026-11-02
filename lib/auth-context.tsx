@@ -26,24 +26,10 @@ const AuthContext = createContext<AuthContextType>(
 )
 
 // Helper: map Supabase user metadata to role
-function getUserRole(email: string, userMetadata?: Record<string, unknown>): AuthUser['role'] {
-  const emailLower = email.toLowerCase()
-  
-  // Check metadata first (set in Supabase dashboard)
+function getUserRole(_email: string, userMetadata?: Record<string, unknown>): AuthUser['role'] {
   const metadataRole = userMetadata?.role
   if (metadataRole === 'Owner') return 'Owner'
   if (metadataRole === 'Lead Sales') return 'Lead Sales'
-  
-  // Fallback: derive from email
-  if (emailLower.includes('loren') || emailLower.includes('lead')) {
-    return 'Lead Sales'
-  }
-  if (emailLower.includes('arsita')) {
-    return 'Sales Staff'
-  }
-  if (emailLower.includes('admin') || emailLower.includes('owner')) {
-    return 'Owner'
-  }
   return 'Sales Staff'
 }
 
@@ -141,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
     
     if (error) {
-      console.error('Google sign-in error:', error.message)
+      // Supabase handles OAuth redirect; error state handled by redirect
     }
   }
 
