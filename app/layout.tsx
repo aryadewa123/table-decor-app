@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import MotionProvider from "@/components/motion/MotionProvider";
+import FlowerBackdrop from "@/components/FlowerBackdrop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,10 @@ export const metadata: Metadata = {
   title: "Yabes — Table Decor Management & Deal Recap",
   description: "Platform Manajemen Rekap Deal Event & Master Inventaris Table Decor",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     title: "Yabes Atelier",
     capable: true,
@@ -54,7 +59,6 @@ export default function RootLayout({
         <meta name="theme-color" content="#4A3E85" />
         <meta name="background-color" content="#FAF9F6" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -62,6 +66,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col text-[#2D2A3E] font-sans selection:bg-[#FFEDA8] selection:text-[#2D2A3E]">
         <AuthProvider>
           <MotionProvider>
+            <FlowerBackdrop />
             {children}
             <Script id="pwa-register" strategy="afterInteractive">
               {`

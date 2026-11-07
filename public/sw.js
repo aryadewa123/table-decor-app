@@ -1,11 +1,19 @@
 // Service Worker for Yabes Atelier PWA
 // Caches app shell for offline access
 
-const CACHE_NAME = 'yabes-atelier-v1'
+const CACHE_NAME = 'yabes-atelier-v4'
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
   '/favicon.ico',
+  '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png',
+  '/flowers/poppy-field.jpg',
+  '/flowers/wedding-bouquet.jpg',
+  '/flowers/table-flowers.jpg',
+  '/flowers/lavender-verification.jpg',
 ]
 
 self.addEventListener('install', (event) => {

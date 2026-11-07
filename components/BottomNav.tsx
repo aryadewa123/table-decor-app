@@ -39,16 +39,16 @@ export default function BottomNav() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E7E3F3] bg-white/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(74,62,133,0.08)]"
+      className="fixed inset-x-0 bottom-0 z-40 px-3 sm:px-5"
       style={{
-        paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 0.65rem)',
         paddingLeft: 'max(env(safe-area-inset-left), 0.75rem)',
         paddingRight: 'max(env(safe-area-inset-right), 0.75rem)',
       }}
     >
       <nav
         aria-label="Main navigation"
-        className="relative mx-auto flex w-full max-w-2xl items-stretch justify-around px-1 pt-1.5"
+        className="app-glass-surface app-bottom-dock relative mx-auto flex w-full max-w-2xl items-stretch justify-around gap-0.5 px-1.5 py-1.5 sm:px-2"
       >
         {navItems.map((item) => {
           const isActive = item.href === '/'
@@ -61,16 +61,19 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-colors ${
+              className={`nav-dock-item flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-300 ${
                 isActive
-                  ? 'bg-[#FFF9E6] font-bold text-[#4A3E85]'
-                  : 'text-[#7B739B] hover:text-[#2D2A3E] hover:bg-[#FAF9F6]'
+                  ? 'bg-[#4A3E85]/10 font-bold text-[#453862] shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]'
+                  : 'text-[#716783] hover:bg-white/35 hover:text-[#2D2A3E]'
               }`}
             >
-              <IconComponent className="h-5 w-5 shrink-0" />
-              <span className="max-w-full truncate text-[10px] font-medium tracking-tight">
+              <span className="nav-dock-icon">
+                <IconComponent className="h-5 w-5 shrink-0" />
+              </span>
+              <span className="max-w-full truncate text-[11px] font-medium tracking-tight">
                 {item.label}
               </span>
+              {isActive && <span className="nav-dock-indicator" aria-hidden="true" />}
             </Link>
           )
         })}
@@ -79,21 +82,22 @@ export default function BottomNav() {
           aria-expanded={moreOpen}
           aria-haspopup="menu"
           onClick={() => setOpenMoreOnPath(moreOpen ? null : pathname)}
-          className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-colors ${
+          className={`nav-dock-item flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-300 ${
             isMoreActive || moreOpen
-              ? 'bg-[#FFF9E6] font-bold text-[#4A3E85]'
-              : 'text-[#7B739B] hover:bg-[#FAF9F6] hover:text-[#2D2A3E]'
+              ? 'bg-[#4A3E85]/10 font-bold text-[#453862] shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]'
+              : 'text-[#716783] hover:bg-white/35 hover:text-[#2D2A3E]'
           }`}
         >
-          <span className="flex h-5 items-center text-lg leading-none" aria-hidden="true">···</span>
-          <span className="max-w-full truncate text-[10px] font-medium tracking-tight">
+          <span className={`nav-dock-icon flex h-5 items-center text-lg leading-none ${moreOpen ? 'rotate-90' : ''}`} aria-hidden="true">···</span>
+          <span className="max-w-full truncate text-[11px] font-medium tracking-tight">
             {t('nav.more')}
           </span>
+          {(isMoreActive || moreOpen) && <span className="nav-dock-indicator" aria-hidden="true" />}
         </button>
         {moreOpen && (
           <div
             role="menu"
-            className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl border border-[#E7E3F3] bg-white p-2 shadow-xl"
+            className="app-glass-surface absolute bottom-full right-0 mb-3 w-52 rounded-2xl p-2"
           >
             {moreItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -107,14 +111,26 @@ export default function BottomNav() {
                   aria-current={isActive ? 'page' : undefined}
                   className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium ${
                     isActive
-                      ? 'bg-[#F6F4FC] text-[#4A3E85]'
-                      : 'text-[#6D658E] hover:bg-[#FAF9F6]'
+                      ? 'bg-[#4A3E85]/10 text-[#453862]'
+                      : 'text-[#6D658E] hover:bg-white/45'
                   }`}
                 >
                   {IconComponent ? (
                     <IconComponent className="h-5 w-5" />
                   ) : (
-                    <span className="w-5 text-center" aria-hidden="true">⚙</span>
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z" />
+                    </svg>
                   )}
                   {item.label}
                 </Link>

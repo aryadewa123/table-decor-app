@@ -1,11 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#4A3E85"/>
-  <circle cx="256" cy="174" r="52" fill="#FFEDA8"/>
-  <ellipse cx="256" cy="128" rx="40" ry="64" fill="#FFD166"/>
-  <ellipse cx="302" cy="160" rx="40" ry="64" transform="rotate(72 302 160)" fill="#FFD166"/>
-  <ellipse cx="284" cy="215" rx="40" ry="64" transform="rotate(144 284 215)" fill="#FFD166"/>
-  <ellipse cx="228" cy="215" rx="40" ry="64" transform="rotate(216 228 215)" fill="#FFD166"/>
-  <ellipse cx="210" cy="160" rx="40" ry="64" transform="rotate(288 210 160)" fill="#FFD166"/>
-  <circle cx="256" cy="174" r="28" fill="#FFEB3B"/>
-  <text x="256" y="365" fill="#FFFFFF" font-family="Georgia,serif" font-size="96" font-weight="700" text-anchor="middle">Y</text>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#574875"/>
+      <stop offset="1" stop-color="#332B4A"/>
+    </linearGradient>
+    <linearGradient id="petal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFF1CE"/>
+      <stop offset="1" stop-color="#D8BC8D"/>
+    </linearGradient>
+    <path id="petal-shape" d="M256 199C218 171 218 125 256 79C294 125 294 171 256 199Z"/>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#ground)"/>
+  <path d="M82 372C141 400 196 414 256 414s115-14 174-42" fill="none" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="2"/>
+  <circle cx="256" cy="214" r="141" fill="none" stroke="#FFF1CE" stroke-opacity=".18" stroke-width="2"/>
+  <g fill="url(#petal)" stroke="#FFF6E4" stroke-opacity=".76" stroke-width="3">
+    <use href="#petal-shape"/>
+    <use href="#petal-shape" transform="rotate(72 256 214)"/>
+    <use href="#petal-shape" transform="rotate(144 256 214)"/>
+    <use href="#petal-shape" transform="rotate(216 256 214)"/>
+    <use href="#petal-shape" transform="rotate(288 256 214)"/>
+  </g>
+  <circle cx="256" cy="214" r="22" fill="#806D91"/>
+  <circle cx="256" cy="214" r="9" fill="#FFF1CE"/>
+  <path d="M256 232C256 283 267 328 289 373" fill="none" stroke="#E3D0A9" stroke-linecap="round" stroke-width="8"/>
+  <path d="M270 333C307 299 342 302 366 314C342 348 311 360 281 351" fill="#AEB49B" fill-opacity=".92"/>
+  <path d="M276 343C306 328 329 319 357 313" fill="none" stroke="#F2E6CA" stroke-opacity=".72" stroke-linecap="round" stroke-width="3"/>
+  <path d="M269 321C243 295 214 293 192 302C208 331 236 343 269 337" fill="#C5B28D" fill-opacity=".92"/>
+  <path d="M263 328C238 315 219 308 199 302" fill="none" stroke="#FFF1CE" stroke-opacity=".66" stroke-linecap="round" stroke-width="3"/>
 </svg>
