@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -32,8 +32,11 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#4A3E85",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

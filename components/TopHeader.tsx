@@ -1,10 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
 
 export default function TopHeader() {
   const { user, logout, isAuthenticated } = useAuth()
+  const language = user?.language ?? 'id'
 
   return (
     <header className="sticky top-0 z-30 bg-[#FAF9F6]/95 border-b border-[#E7E3F3] shadow-sm">
@@ -28,18 +31,37 @@ export default function TopHeader() {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
-                <div
-                  className="w-7 h-7 rounded-full bg-[#FFF9E6] text-[#FFD166] flex items-center justify-center text-xs font-bold shadow-md shadow-[#FFD166]/30"
+                <Link
+                  href="/settings"
+                  aria-label={translate(language, 'nav.openSettings')}
                   title={`${user.name} (${user.role})`}
+                  className="flex min-h-11 items-center gap-2 rounded-full p-1 pr-2 transition-colors hover:bg-[#F0EDF9]"
                 >
-                  {user.name.slice(0, 2).toUpperCase()}
-                </div>
+                  <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#FFF9E6] text-xs font-bold text-[#4A3E85] ring-1 ring-[#DED9F4]">
+                    {user.avatarUrl ? (
+                      <Image
+                        src={user.avatarUrl}
+                        alt=""
+                        width={32}
+                        height={32}
+                        unoptimized
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      user.name.slice(0, 2).toUpperCase()
+                    )}
+                  </span>
+                  <span className="hidden max-w-32 truncate text-xs font-semibold text-[#4A3E85] sm:inline">
+                    {user.name}
+                  </span>
+                </Link>
                 <button
                   onClick={logout}
-                  title="Keluar / Ganti Akun"
-                  className="text-xs font-medium text-[#7B739B] hover:text-[#2D2A3E] transition-colors"
+                  title={translate(language, 'nav.signOut')}
+                  aria-label={translate(language, 'nav.signOut')}
+                  className="hidden min-h-11 rounded-lg px-2 text-xs font-medium text-[#7B739B] transition-colors hover:text-[#2D2A3E] sm:inline-flex sm:items-center"
                 >
-                  Keluar
+                  {translate(language, 'nav.signOut')}
                 </button>
               </div>
             ) : (
@@ -47,7 +69,7 @@ export default function TopHeader() {
                 href="/login"
                 className="text-xs font-medium text-[#4A3E85] hover:underline"
               >
-                Masuk
+                {translate(language, 'nav.signIn')}
               </Link>
             )}
           </div>

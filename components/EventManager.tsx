@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
 import type { EventRecord, PaymentStatus } from '@/lib/types'
 import EventModal from '@/components/EventModal'
 
@@ -14,6 +16,9 @@ export default function EventManager({
   isModalOpen,
   setIsModalOpen,
 }: EventManagerProps) {
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,9 +34,6 @@ export default function EventManager({
   const [eventToEdit, setEventToEdit] = useState<EventRecord | null>(null)
 
   const fetchEvents = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
     let query = supabase
       .from('events')
       .select('*')
@@ -55,19 +57,41 @@ export default function EventManager({
       query = query.eq('sales_pic', selectedPic)
     }
 
-    const { data, error: fetchErr } = await query
+    return query
+  }, [selectedMonth, selectedStatus, selectedPic])
+
+  const refreshEvents = useCallback(async () => {
+    setLoading(true)
+    const { data, error: fetchErr } = await fetchEvents()
 
     if (fetchErr) {
       setError(`Gagal memuat rekap event: ${fetchErr.message}`)
       console.error('Error fetching events:', fetchErr)
     } else {
+      setError(null)
       setEvents(data || [])
     }
     setLoading(false)
-  }, [selectedMonth, selectedStatus, selectedPic])
+  }, [fetchEvents])
 
   useEffect(() => {
-    fetchEvents()
+    let active = true
+    void fetchEvents().then(({ data, error: fetchErr }) => {
+      if (!active) return
+
+      if (fetchErr) {
+        setError(`Gagal memuat rekap event: ${fetchErr.message}`)
+        console.error('Error fetching events:', fetchErr)
+      } else {
+        setError(null)
+        setEvents(data || [])
+      }
+      setLoading(false)
+    })
+
+    return () => {
+      active = false
+    }
   }, [fetchEvents])
 
   // Filter by search query (client name or venue)
@@ -116,7 +140,7 @@ export default function EventManager({
     if (delErr) {
       alert(`Gagal menghapus: ${delErr.message}`)
     } else {
-      await fetchEvents()
+      await refreshEvents()
     }
   }
 
@@ -215,7 +239,7 @@ export default function EventManager({
           <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-[#B1A9DA]/15 group-hover:scale-110 transition-transform pointer-events-none" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#7B739B]">
-              Total Omset
+              {t('events.totalRevenue')}
             </span>
             <span className="text-xl">🌸</span>
           </div>
@@ -223,7 +247,7 @@ export default function EventManager({
             {formatRupiah(metrics.totalOmset)}
           </p>
           <p className="text-[11px] text-[#7B739B] mt-1 font-medium">
-            {filteredEvents.length} Event Terdata
+            {filteredEvents.length} {t('events.eventCount')}
           </p>
         </div>
 
@@ -240,7 +264,7 @@ export default function EventManager({
             {formatRupiah(metrics.totalTransfer)}
           </p>
           <p className="text-[11px] text-[#2F7B56]/80 mt-1 font-medium">
-            Dana riil masuk ke rekening
+            {t('events.cashIn')}
           </p>
         </div>
 
@@ -249,7 +273,7 @@ export default function EventManager({
           <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-[#FFEDA8]/40 group-hover:scale-110 transition-transform pointer-events-none" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#A3432B]">
-              Sisa Piutang
+              {t('events.outstanding')}
             </span>
             <span className="text-xl">⚠️</span>
           </div>
@@ -257,7 +281,7 @@ export default function EventManager({
             {formatRupiah(metrics.totalPiutang)}
           </p>
           <p className="text-[11px] text-[#8C7718] mt-1 font-medium">
-            {metrics.totalPiutang === 0 ? '✓ Tidak ada tunggakan' : 'Perlu follow-up penagihan'}
+            {metrics.totalPiutang === 0 ? `✓ ${t('events.noArrears')}` : t('events.needsFollowUp')}
           </p>
         </div>
 
@@ -266,7 +290,7 @@ export default function EventManager({
           <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-[#B1A9DA]/15 group-hover:scale-110 transition-transform pointer-events-none" />
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#7B739B]">
-              Tingkat Kelunasan
+              {t('events.collectionRate')}
             </span>
             <span className="text-xl">✨</span>
           </div>
@@ -277,7 +301,7 @@ export default function EventManager({
             %
           </p>
           <p className="text-[11px] text-[#7B739B] mt-1 font-medium">
-            {metrics.lunasCount} dari {filteredEvents.length} Event Lunas
+            {metrics.lunasCount} / {filteredEvents.length} {t('events.paidCount')}
           </p>
         </div>
       </div>
@@ -288,10 +312,10 @@ export default function EventManager({
           {/* Month Selector Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
             <span className="text-xs font-bold uppercase text-[#7B739B] mr-2">
-              Periode:
+              {t('events.period')}:
             </span>
             {[
-              { label: 'Semua Periode', value: 'all' },
+              { label: t('events.allPeriods'), value: 'all' },
               { label: 'Agustus 2026', value: '2026-08' },
               { label: 'September 2026', value: '2026-09' },
               { label: 'Oktober 2026', value: '2026-10' },
@@ -316,7 +340,7 @@ export default function EventManager({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari klien, venue, dekor..."
+              placeholder={t('events.search')}
               className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#FAF9F6] border border-[#DED9F4] text-xs sm:text-sm text-[#322A5E] placeholder-[#B5B0CC] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
             />
             <span className="absolute left-3 top-2.5 text-xs text-[#7B739B]">
@@ -328,28 +352,28 @@ export default function EventManager({
         {/* Sub-Filters: Status & Sales PIC */}
         <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#F0EDF9] text-xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[#6D658E]">Status:</span>
+            <span className="font-semibold text-[#6D658E]">{t('events.status')}:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-3 py-1.5 rounded-lg bg-[#FAF9F6] border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
             >
-              <option value="all">Semua Status</option>
-              <option value="Lunas">Lunas</option>
-              <option value="DP">DP</option>
-              <option value="Kurang">Kurang (Piutang)</option>
-              <option value="Batal">Batal</option>
+              <option value="all">{t('events.allStatuses')}</option>
+              <option value="Lunas">{t('events.paid')}</option>
+              <option value="DP">{t('events.downPayment')}</option>
+              <option value="Kurang">{t('events.balanceDue')}</option>
+              <option value="Batal">{t('events.canceled')}</option>
             </select>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[#6D658E]">Sales PIC:</span>
+            <span className="font-semibold text-[#6D658E]">{t('events.salesPic')}:</span>
             <select
               value={selectedPic}
               onChange={(e) => setSelectedPic(e.target.value)}
               className="px-3 py-1.5 rounded-lg bg-[#FAF9F6] border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
             >
-              <option value="all">Semua Sales PIC</option>
+              <option value="all">{t('events.allSales')}</option>
               <option value="Ce Loren">Ce Loren</option>
               <option value="Arsita">Arsita</option>
             </select>
@@ -364,7 +388,7 @@ export default function EventManager({
             }}
             className="ml-auto text-[#7B739B] hover:text-[#322A5E] underline text-xs"
           >
-            Reset Filter
+            {t('events.reset')}
           </button>
 
           {/* Export CSV Button */}
@@ -374,7 +398,7 @@ export default function EventManager({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#FFD166] bg-[#FFF9E6] hover:bg-[#FFEBD5] border border-[#FFD166]/30 transition-all duration-200 disabled:opacity-40 hover:scale-[1.02] active:scale-95 shadow-md shadow-[#FFD166]/20"
           >
             <span>📊</span>
-            <span>{exporting ? 'Mengekspor...' : 'Export CSV'}</span>
+            <span>{exporting ? t('events.exporting') : t('events.export')}</span>
           </button>
         </div>
       </div>
@@ -392,7 +416,7 @@ export default function EventManager({
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center text-[#7B739B]">
             <div className="w-10 h-10 border-4 border-[#B1A9DA] border-t-transparent rounded-full animate-spin mb-3" />
-            <p className="text-sm font-medium">Memuat Rekap Deal Events...</p>
+            <p className="text-sm font-medium">{t('events.loading')}</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="py-20 text-center text-[#7B739B] px-4">
@@ -400,11 +424,10 @@ export default function EventManager({
               🌸
             </div>
             <h3 className="font-serif text-lg font-bold text-[#322A5E] mb-1">
-              Belum Ada Rekap Deal Event
+              {t('events.emptyTitle')}
             </h3>
             <p className="text-xs text-[#7B739B] max-w-sm mx-auto mb-5">
-              Tabel rekap deal masih kosong. Anda dapat menambahkan transaksi deal
-              baru atau mengimpor data riil dari file Excel.
+              {t('events.emptyDescription')}
             </p>
             <button
               onClick={() => {
@@ -413,7 +436,7 @@ export default function EventManager({
               }}
               className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] border border-[#FAE489] transition shadow-sm"
             >
-              + Catat Rekap Deal Pertama
+              + {t('events.firstDeal')}
             </button>
           </div>
         ) : (
@@ -421,18 +444,18 @@ export default function EventManager({
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#FAF9F6] border-b border-[#DED9F4] text-[#6D658E] uppercase tracking-wider font-semibold">
-                  <th className="py-3.5 px-3 text-center w-12">No</th>
-                  <th className="py-3.5 px-3 whitespace-nowrap">Dealing Date</th>
-                  <th className="py-3.5 px-3">Klien</th>
-                  <th className="py-3.5 px-3">Tipe Dekor</th>
-                  <th className="py-3.5 px-3">Venue / Lokasi</th>
-                  <th className="py-3.5 px-3 whitespace-nowrap">Tgl Event</th>
-                  <th className="py-3.5 px-3 text-right">Total (Rp)</th>
-                  <th className="py-3.5 px-3 text-right">Transfer (Rp)</th>
-                  <th className="py-3.5 px-3 text-right">Kurang (Rp)</th>
-                  <th className="py-3.5 px-3 text-center">Status</th>
-                  <th className="py-3.5 px-3">Sales PIC</th>
-                  <th className="py-3.5 px-3 text-center w-24">Aksi</th>
+                  <th className="py-3.5 px-3 text-center w-12">{t('events.number')}</th>
+                  <th className="py-3.5 px-3 whitespace-nowrap">{t('events.dealDate')}</th>
+                  <th className="py-3.5 px-3">{t('events.client')}</th>
+                  <th className="py-3.5 px-3">{t('events.decor')}</th>
+                  <th className="py-3.5 px-3">{t('events.venue')}</th>
+                  <th className="py-3.5 px-3 whitespace-nowrap">{t('events.eventDate')}</th>
+                  <th className="py-3.5 px-3 text-right">{t('events.total')}</th>
+                  <th className="py-3.5 px-3 text-right">{t('events.transfer')}</th>
+                  <th className="py-3.5 px-3 text-right">{t('events.remaining')}</th>
+                  <th className="py-3.5 px-3 text-center">{t('events.status')}</th>
+                  <th className="py-3.5 px-3">{t('events.salesPic')}</th>
+                  <th className="py-3.5 px-3 text-center w-24">{t('events.action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F0EDF9]">
@@ -511,7 +534,7 @@ export default function EventManager({
                             setEventToEdit(evt)
                             setIsModalOpen(true)
                           }}
-                          title="Edit Event"
+                          title={t('events.edit')}
                           className="w-7 h-7 rounded-lg bg-[#F4F2FB] hover:bg-[#EAE5F7] text-[#564B95] flex items-center justify-center transition"
                         >
                           ✏️
@@ -520,7 +543,7 @@ export default function EventManager({
                           onClick={() =>
                             handleDeleteEvent(evt.id, evt.client_name)
                           }
-                          title="Hapus Event"
+                          title={t('events.delete')}
                           className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition"
                         >
                           🗑️
@@ -535,7 +558,7 @@ export default function EventManager({
               <tfoot>
                 <tr className="bg-[#FAF9F6] border-t-2 border-[#DED9F4] font-bold text-[#322A5E]">
                   <td colSpan={6} className="py-3.5 px-4 text-right uppercase text-[11px] text-[#7B739B]">
-                    Grand Total ({filteredEvents.length} Event):
+                    {t('events.grandTotal')} ({filteredEvents.length}):
                   </td>
                   <td className="py-3.5 px-3 text-right text-sm text-[#322A5E]">
                     {formatRupiah(metrics.totalOmset)}
@@ -556,13 +579,14 @@ export default function EventManager({
 
       {/* Modal Dialog */}
       <EventModal
+        key={eventToEdit?.id ?? (isModalOpen ? 'new-event' : 'closed')}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false)
           setEventToEdit(null)
         }}
         onSuccess={() => {
-          fetchEvents()
+          refreshEvents()
         }}
         eventToEdit={eventToEdit}
       />

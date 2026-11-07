@@ -4,9 +4,15 @@ import { useState, useEffect, useMemo } from 'react'
 import TopHeader from '@/components/TopHeader'
 import BottomNav from '@/components/BottomNav'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
+import { useToday } from '@/lib/use-today'
 import type { EventRecord } from '@/lib/types'
 
 export default function FollowUpPage() {
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -26,16 +32,7 @@ export default function FollowUpPage() {
     fetchUnpaid()
   }, [])
 
-  // Current date YYYY-MM-DD (set on client only to avoid prerender time mismatch)
-  const [todayStr, setTodayStr] = useState('')
-
-  useEffect(() => {
-    const d = new Date()
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    setTodayStr(`${y}-${m}-${day}`)
-  }, [])
+  const todayStr = useToday()
 
   // Filter clients with unpaid balance
   const unpaidEvents = useMemo(() => {
@@ -83,10 +80,10 @@ export default function FollowUpPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DED9F4]/70 pb-4">
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#322A5E]">
-              Follow Up Piutang
+              {t('page.followUp')}
             </h1>
             <p className="text-xs text-[#7B739B] mt-0.5">
-              Daftar penagihan pelunasan decor, diurutkan berdasarkan urgensi tanggal acara
+              {t('page.followUpDescription')}
             </p>
           </div>
 

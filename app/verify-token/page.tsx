@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 function VerifyTokenForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated } = useAuth()
+  const { user, loading, isAuthenticated } = useAuth()
 
   const [token, setToken] = useState('')
   const [error, setError] = useState('')
@@ -19,10 +19,20 @@ function VerifyTokenForm() {
 
   // If no user, redirect to login
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-transparent">
+        <div className="w-full max-w-md text-center">
+          <p className="text-sm text-[#7B739B]">Memuat...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

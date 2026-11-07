@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
 import type { InventoryCategory, InventoryItem, ItemVariant } from '@/lib/types'
 
 export default function InventoryManager() {
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
   const [categories, setCategories] = useState<InventoryCategory[]>([])
   const [items, setItems] = useState<InventoryItem[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all')
@@ -26,21 +31,12 @@ export default function InventoryManager() {
   const [additionalVariantQty, setAdditionalVariantQty] = useState<number>(5)
   const [savingVariant, setSavingVariant] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-
+  const loadData = useCallback(async () => {
     // 1. Fetch categories
     const { data: catData, error: catErr } = await supabase
       .from('inventory_categories')
       .select('*')
       .order('category_code', { ascending: true })
-
-    if (!catErr && catData) {
-      setCategories(catData)
-      if (catData.length > 0 && !newItemCategoryId) {
-        setNewItemCategoryId(catData[0].id)
-      }
-    }
 
     // 2. Fetch items with variants and category join
     const { data: itemData, error: itemErr } = await supabase
@@ -56,17 +52,51 @@ export default function InventoryManager() {
       `)
       .order('created_at', { ascending: false })
 
+    return { catData, catErr, itemData, itemErr }
+  }, [])
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    const { catData, catErr, itemData, itemErr } = await loadData()
+
+    if (!catErr && catData) {
+      setCategories(catData)
+      if (catData.length > 0) {
+        setNewItemCategoryId(current => current || catData[0].id)
+      }
+    }
+
     if (!itemErr && itemData) {
       // cast to InventoryItem
       setItems(itemData as unknown as InventoryItem[])
     }
 
     setLoading(false)
-  }, [newItemCategoryId])
+  }, [loadData])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    let active = true
+    void loadData().then(({ catData, catErr, itemData, itemErr }) => {
+      if (!active) return
+
+      if (!catErr && catData) {
+        setCategories(catData)
+        if (catData.length > 0) {
+          setNewItemCategoryId(current => current || catData[0].id)
+        }
+      }
+
+      if (!itemErr && itemData) {
+        setItems(itemData as unknown as InventoryItem[])
+      }
+
+      setLoading(false)
+    })
+
+    return () => {
+      active = false
+    }
+  }, [loadData])
 
   // Filter items
   const filteredItems = items.filter((item) => {
@@ -195,10 +225,10 @@ export default function InventoryManager() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#322A5E]">
-              Master Inventaris Table Decor
+              {t('inventory.masterTitle')}
             </h2>
             <p className="text-xs text-[#7B739B]">
-              Katalog barang, vas, lilin, taplak, dan bunga beserta jumlah stok varian
+              {t('inventory.description')}
             </p>
           </div>
 
@@ -207,7 +237,7 @@ export default function InventoryManager() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] border border-[#FAE489] transition shadow-sm self-start sm:self-auto"
           >
             <span>+</span>
-            <span>Tambah Barang Baru</span>
+            <span>{t('inventory.addItem')}</span>
           </button>
         </div>
 
@@ -221,7 +251,7 @@ export default function InventoryManager() {
                 : 'bg-[#F4F2FB] text-[#6D658E] hover:bg-[#EAE5F7]'
             }`}
           >
-            Semua Kategori ({items.length})
+            {t('inventory.allCategories')} ({items.length})
           </button>
           {categories.map((cat) => {
             const count = items.filter((i) => i.category_id === cat.id).length
@@ -249,13 +279,13 @@ export default function InventoryManager() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama barang atau kategori..."
+            placeholder={t('inventory.search')}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-xs sm:text-sm text-[#322A5E] placeholder-[#B5B0CC] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
           />
           <span className="absolute left-3 top-2.5 text-xs text-[#7B739B]">🔍</span>
         </div>
         <span className="text-xs text-[#7B739B]">
-          Menampilkan <strong>{filteredItems.length}</strong> barang
+          {t('inventory.showing')} <strong>{filteredItems.length}</strong> {t('inventory.items')}
         </span>
       </div>
 
@@ -263,7 +293,7 @@ export default function InventoryManager() {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#7B739B]">
           <div className="w-10 h-10 border-4 border-[#B1A9DA] border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-sm font-medium">Memuat Katalog Inventaris...</p>
+          <p className="text-sm font-medium">{t('inventory.loading')}</p>
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="p-12 text-center rounded-3xl bg-white border border-[#DED9F4] shadow-sm">
@@ -271,16 +301,16 @@ export default function InventoryManager() {
             🌿
           </div>
           <h3 className="font-serif text-base font-bold text-[#322A5E]">
-            Belum Ada Barang di Kategori Ini
+            {t('inventory.emptyTitle')}
           </h3>
           <p className="text-xs text-[#7B739B] mt-1 mb-4">
-            Tambahkan barang dekorasi meja pertama ke dalam sistem inventaris.
+            {t('inventory.emptyDescription')}
           </p>
           <button
             onClick={() => setIsAddItemOpen(true)}
             className="px-4 py-2 rounded-xl text-xs font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] border border-[#FAE489]"
           >
-            + Tambah Barang Sekarang
+            + {t('inventory.addNow')}
           </button>
         </div>
       ) : (
@@ -293,10 +323,10 @@ export default function InventoryManager() {
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-[#F4F2FB] text-[#564B95] border border-[#DED9F4]">
-                    {item.inventory_categories?.category_name || 'Kategori'}
+                    {item.inventory_categories?.category_name || t('inventory.category')}
                   </span>
                   <span className="text-[11px] font-medium text-[#7B739B]">
-                    Satuan: {item.unit}
+                    {t('inventory.unit')}: {item.unit}
                   </span>
                 </div>
 
@@ -308,17 +338,17 @@ export default function InventoryManager() {
               {/* Variants & Stock Section */}
               <div className="p-3 rounded-2xl bg-[#FAF9F6] border border-[#EAE5F7] space-y-2">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-[#6D658E]">
-                  <span>Varian &amp; Stok Fisik</span>
+                  <span>{t('inventory.variantsStock')}</span>
                   <button
                     onClick={() => setSelectedItemForVariant(item)}
                     className="text-[#564B95] hover:underline font-bold text-[10px]"
                   >
-                    + Varian
+                    + {t('inventory.addVariant')}
                   </button>
                 </div>
 
                 {(!item.item_variants || item.item_variants.length === 0) ? (
-                  <p className="text-[11px] text-[#7B739B] italic">Belum ada varian.</p>
+                  <p className="text-[11px] text-[#7B739B] italic">{t('inventory.noVariants')}</p>
                 ) : (
                   <div className="space-y-1.5">
                     {item.item_variants.map((v: ItemVariant) => (
@@ -334,7 +364,7 @@ export default function InventoryManager() {
                           <button
                             onClick={() => handleAdjustStock(v.id, -1)}
                             className="w-5 h-5 rounded bg-[#F4F2FB] hover:bg-[#EAE5F7] text-[#564B95] flex items-center justify-center font-bold text-xs"
-                            title="Kurang 1"
+                            title={t('inventory.decreaseOne')}
                           >
                             -
                           </button>
@@ -352,7 +382,7 @@ export default function InventoryManager() {
                           <button
                             onClick={() => handleAdjustStock(v.id, 1)}
                             className="w-5 h-5 rounded bg-[#F4F2FB] hover:bg-[#EAE5F7] text-[#564B95] flex items-center justify-center font-bold text-xs"
-                            title="Tambah 1"
+                            title={t('inventory.increaseOne')}
                           >
                             +
                           </button>
@@ -373,7 +403,7 @@ export default function InventoryManager() {
           <div className="bg-[#FAF9F6] rounded-3xl p-6 w-full max-w-md border border-[#DED9F4] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#DED9F4]">
               <h3 className="font-serif text-lg font-bold text-[#322A5E]">
-                + Tambah Barang Inventaris
+                + {t('inventory.addNewTitle')}
               </h3>
               <button
                 onClick={() => setIsAddItemOpen(false)}
@@ -386,7 +416,7 @@ export default function InventoryManager() {
             <form onSubmit={handleCreateItem} className="space-y-4 text-xs">
               <div>
                 <label className="block font-semibold text-[#564B95] mb-1">
-                  Kategori Inventaris *
+                  {t('inventory.categoryRequired')}
                 </label>
                 <select
                   value={newItemCategoryId}
@@ -404,13 +434,13 @@ export default function InventoryManager() {
 
               <div>
                 <label className="block font-semibold text-[#564B95] mb-1">
-                  Nama Barang *
+                  {t('inventory.itemRequired')}
                 </label>
                 <input
                   type="text"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder="Contoh: Vas Kaca Silinder, Lilin Pilar Lavender..."
+                  placeholder={t('inventory.itemExample')}
                   required
                   className="w-full px-3 py-2 rounded-xl bg-white border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
                 />
@@ -419,7 +449,7 @@ export default function InventoryManager() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-[#564B95] mb-1">
-                    Satuan Unit
+                    {t('inventory.unitLabel')}
                   </label>
                   <select
                     value={newItemUnit}
@@ -436,13 +466,13 @@ export default function InventoryManager() {
 
                 <div>
                   <label className="block font-semibold text-[#564B95] mb-1">
-                    Nama Varian Awal
+                    {t('inventory.initialVariant')}
                   </label>
                   <input
                     type="text"
                     value={newVariantName}
                     onChange={(e) => setNewVariantName(e.target.value)}
-                    placeholder="Standard, Gold, dll"
+                    placeholder={t('inventory.standardExample')}
                     className="w-full px-3 py-2 rounded-xl bg-white border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
                   />
                 </div>
@@ -450,7 +480,7 @@ export default function InventoryManager() {
 
               <div>
                 <label className="block font-semibold text-[#564B95] mb-1">
-                  Stok Awal
+                  {t('inventory.startingStock')}
                 </label>
                 <input
                   type="number"
@@ -467,14 +497,14 @@ export default function InventoryManager() {
                   onClick={() => setIsAddItemOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-[#7B739B] hover:bg-gray-100"
                 >
-                  Batal
+                  {t('inventory.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={savingItem}
                   className="px-5 py-2 rounded-xl text-xs font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] border border-[#FAE489] transition"
                 >
-                  {savingItem ? 'Menyimpan...' : 'Simpan Barang'}
+                  {savingItem ? t('inventory.saving') : t('inventory.saveItem')}
                 </button>
               </div>
             </form>
@@ -489,7 +519,7 @@ export default function InventoryManager() {
             <div className="flex items-center justify-between pb-3 border-b border-[#DED9F4]">
               <div>
                 <h3 className="font-serif text-base font-bold text-[#322A5E]">
-                  + Tambah Varian Baru
+                  + {t('inventory.newVariantTitle')}
                 </h3>
                 <p className="text-[11px] text-[#7B739B]">
                   Untuk: {selectedItemForVariant.item_name}
@@ -506,13 +536,13 @@ export default function InventoryManager() {
             <form onSubmit={handleAddVariant} className="space-y-4 text-xs">
               <div>
                 <label className="block font-semibold text-[#564B95] mb-1">
-                  Nama Varian / Warna / Ukuran *
+                  {t('inventory.variantRequired')}
                 </label>
                 <input
                   type="text"
                   value={additionalVariantName}
                   onChange={(e) => setAdditionalVariantName(e.target.value)}
-                  placeholder="Contoh: Gold, Silver, Putih, XL, dll"
+                  placeholder={t('inventory.variantExample')}
                   required
                   className="w-full px-3 py-2 rounded-xl bg-white border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
                 />
@@ -520,7 +550,7 @@ export default function InventoryManager() {
 
               <div>
                 <label className="block font-semibold text-[#564B95] mb-1">
-                  Stok Awal
+                  {t('inventory.startingStock')}
                 </label>
                 <input
                   type="number"
@@ -537,14 +567,14 @@ export default function InventoryManager() {
                   onClick={() => setSelectedItemForVariant(null)}
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-[#7B739B] hover:bg-gray-100"
                 >
-                  Batal
+                  {t('inventory.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={savingVariant}
                   className="px-5 py-2 rounded-xl text-xs font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] border border-[#FAE489] transition"
                 >
-                  {savingVariant ? 'Menyimpan...' : 'Simpan Varian'}
+                  {savingVariant ? t('inventory.saving') : t('inventory.saveVariant')}
                 </button>
               </div>
             </form>

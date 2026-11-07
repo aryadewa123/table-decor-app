@@ -3,12 +3,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import type { AppLanguage } from '@/lib/i18n'
 
 export interface AuthUser {
   id: string
   name: string
   email: string
   role: 'Owner' | 'Lead Sales' | 'Sales Staff'
+  avatarUrl: string | null
+  language: AppLanguage
 }
 
 interface AuthContextType {
@@ -18,6 +21,11 @@ interface AuthContextType {
   logout: () => void
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signInWithGoogle: () => Promise<void>
+  updateProfile: (updates: {
+    name?: string
+    avatarUrl?: string | null
+    language?: AppLanguage
+  }) => Promise<{ error: string | null }>
   isAuthenticated: boolean
 }
 
@@ -45,26 +53,41 @@ function getUserName(email: string, userMetadata?: Record<string, unknown>): str
   return namePart.charAt(0).toUpperCase() + namePart.slice(1)
 }
 
+function toAuthUser(user: {
+  id: string
+  email?: string
+  user_metadata?: Record<string, unknown>
+}): AuthUser {
+  const email = user.email || ''
+  const language = user.user_metadata?.preferred_language
+
+  return {
+    id: user.id,
+    name: getUserName(email, user.user_metadata),
+    email,
+    role: getUserRole(email, user.user_metadata),
+    avatarUrl:
+      typeof user.user_metadata?.avatar_url === 'string'
+        ? user.user_metadata.avatar_url
+        : null,
+    language: language === 'en' ? 'en' : 'id',
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
+    document.documentElement.lang = user?.language ?? 'id'
+  }, [user?.language])
+
+  useEffect(() => {
     // Get session and user from Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        const supabaseUser = session.user
-        const role = getUserRole(supabaseUser.email || '', supabaseUser.user_metadata)
-        const name = getUserName(supabaseUser.email || '', supabaseUser.user_metadata)
-        
-        const authUser: AuthUser = {
-          id: supabaseUser.id,
-          name,
-          email: supabaseUser.email || '',
-          role,
-        }
-        setUser(authUser)
+        setUser(toAuthUser(session.user))
       } else {
         setUser(null)
       }
@@ -74,17 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        const supabaseUser = session.user
-        const role = getUserRole(supabaseUser.email || '', supabaseUser.user_metadata)
-        const name = getUserName(supabaseUser.email || '', supabaseUser.user_metadata)
-        
-        const authUser: AuthUser = {
-          id: supabaseUser.id,
-          name,
-          email: supabaseUser.email || '',
-          role,
-        }
-        setUser(authUser)
+        setUser(toAuthUser(session.user))
       }
       setLoading(false)
     })
@@ -131,6 +144,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const updateProfile: AuthContextType['updateProfile'] = async (updates) => {
+    const { data: { user: currentUser }, error: currentUserError } =
+      await supabase.auth.getUser()
+
+    if (currentUserError || !currentUser) {
+      return { error: currentUserError?.message || 'Sesi login tidak ditemukan.' }
+    }
+
+    const userMetadata = { ...currentUser.user_metadata }
+    if (updates.name !== undefined) userMetadata.full_name = updates.name.trim()
+    if (updates.avatarUrl !== undefined) userMetadata.avatar_url = updates.avatarUrl
+    if (updates.language !== undefined) {
+      userMetadata.preferred_language = updates.language
+    }
+
+    const { data, error } = await supabase.auth.updateUser({ data: userMetadata })
+    if (error) return { error: error.message }
+
+    if (data.user) setUser(toAuthUser(data.user))
+    return { error: null }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -140,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         signInWithPassword,
         signInWithGoogle,
+        updateProfile,
         isAuthenticated: !!user,
       }}
     >

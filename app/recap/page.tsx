@@ -4,8 +4,14 @@ import { useState, Suspense } from 'react'
 import TopHeader from '@/components/TopHeader'
 import BottomNav from '@/components/BottomNav'
 import EventManager from '@/components/EventManager'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
+
 function RecapContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent selection:bg-[#FFEDA8] selection:text-[#322A5E]">
@@ -16,10 +22,10 @@ function RecapContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DED9F4]/70">
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#322A5E]">
-              Recap
+              {t('page.recap')}
             </h1>
             <p className="text-xs text-[#7B739B] mt-0.5">
-              Rekap lengkap transaksi deal decor, status pelunasan, dan pencatatan event
+              {t('page.recapDescription')}
             </p>
           </div>
 
@@ -30,7 +36,7 @@ function RecapContent() {
               className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] active:scale-95 transition-all shadow-md shadow-[#FFEDA8]/60 border border-[#FAE489]"
             >
               <span className="text-lg leading-none">+</span>
-              <span>Deal Event Baru</span>
+              <span>{t('page.newEvent')}</span>
             </button>
           </div>
         </div>

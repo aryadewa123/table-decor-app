@@ -10,6 +10,7 @@ const protectedRoutes = [
   '/follow-up',
   '/recap',
   '/inventory',
+  '/settings',
 ]
 
 const publicRoutes = [

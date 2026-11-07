@@ -53,7 +53,16 @@ Recommended: Vercel.
 3. Add env vars in Vercel project settings
 4. Deploy
 
+## App Settings and Installation
+
+- The app can be installed from the browser menu on supported devices. Installed
+  browsers use fullscreen display when available and fall back to standalone mode.
+- To enable profile photo uploads, run `supabase/avatar-storage.sql` in the
+  Supabase SQL Editor. This creates the public `avatars` bucket and limits
+  uploads and changes to each authenticated user's own folder.
+- Language and profile details are saved to the signed-in user's Supabase Auth
+  metadata.
+
 ## License
 
 Private
-

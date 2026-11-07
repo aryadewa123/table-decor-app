@@ -1,13 +1,18 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import Link from 'next/link'
 import TopHeader from '@/components/TopHeader'
 import BottomNav from '@/components/BottomNav'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
+import { useToday } from '@/lib/use-today'
 import type { EventRecord } from '@/lib/types'
 
 export default function EventsPage() {
+  const { user } = useAuth()
+  const language = user?.language ?? 'id'
+  const t = (key: Parameters<typeof translate>[1]) => translate(language, key)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,16 +32,7 @@ export default function EventsPage() {
     fetchUpcoming()
   }, [])
 
-  // Get current reference date in YYYY-MM-DD (set on client only to avoid prerender time mismatch)
-  const [todayStr, setTodayStr] = useState('')
-
-  useEffect(() => {
-    const d = new Date()
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    setTodayStr(`${y}-${m}-${day}`)
-  }, [])
+  const todayStr = useToday()
 
   // Segment 1: Today's Event
   const todaysEvents = useMemo(() => {
@@ -72,16 +68,16 @@ export default function EventsPage() {
         <div className="flex items-center justify-between border-b border-[#DED9F4]/70 pb-4">
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#322A5E]">
-              Events
+              {t('page.events')}
             </h1>
             <p className="text-xs text-[#7B739B] mt-0.5">
-              Jadwal pelaksanaan dekorasi hari ini dan acara mendatang
+              {t('page.eventsDescription')}
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-[#EAE5F8] text-[#4A3E85] border border-[#DED9F4]">
             <span>🗓️</span>
-            <span>{todaysEvents.length + ongoingEvents.length} Event Aktif</span>
+            <span>{todaysEvents.length + ongoingEvents.length} {t('page.activeEvents')}</span>
           </div>
         </div>
 
@@ -91,22 +87,22 @@ export default function EventsPage() {
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
               <h2 className="font-serif text-lg sm:text-xl font-bold text-[#322A5E]">
-                Today&apos;s Event
+                {t('page.todayEvent')}
               </h2>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                 {todaysEvents.length}
               </span>
             </div>
-            <span className="text-xs text-[#7B739B]">Pelaksanaan Hari Ini</span>
+            <span className="text-xs text-[#7B739B]">{t('page.todayEvent')}</span>
           </div>
 
           {loading ? (
             <div className="p-8 text-center bg-white rounded-2xl border border-[#DED9F4] text-xs text-[#7B739B]">
-              Memuat jadwal event...
+              {t('page.eventsLoading')}
             </div>
           ) : todaysEvents.length === 0 ? (
             <div className="p-6 text-center bg-white rounded-2xl border border-[#DED9F4] text-xs text-[#7B739B]">
-              🌸 Tidak ada jadwal event dekorasi untuk hari ini.
+              🌸 {t('page.noTodayEvents')}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

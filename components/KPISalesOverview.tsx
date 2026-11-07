@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
 import type { EventRecord } from '@/lib/types'
 
 export default function KPISalesOverview() {
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -113,7 +118,7 @@ export default function KPISalesOverview() {
           <div className="h-80 rounded-3xl skeleton" />
           <div className="h-80 rounded-3xl skeleton" />
         </div>
-        <p className="text-center text-sm font-medium text-[#7B739B]">Menganalisis Performa Sales Yabes...</p>
+        <p className="text-center text-sm font-medium text-[#7B739B]">{t('page.salesLoading')}</p>
       </div>
     )
   }
@@ -126,22 +131,21 @@ export default function KPISalesOverview() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#DED9F4] text-xs font-semibold text-[#564B95] mb-2">
               <span>🌸</span>
-              <span>Yabes Atelier Executive Analytics</span>
+              <span>{t('page.salesAnalytics')}</span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#322A5E]">
-              Performa Finansial &amp; Distribusi Sales
+              {t('page.financialPerformance')}
             </h2>
             <p className="text-xs sm:text-sm text-[#7B739B] mt-1 max-w-xl">
-              Ringkasan konversi transaksi deal dekorasi, perolehan kas masuk riil,
-              dan kontribusi sales PIC per event.
+              {t('page.financialDescription')}
             </p>
           </div>
 
           <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-[#DED9F4] shadow-sm">
             <div className="text-right">
-              <p className="text-xs uppercase font-bold text-[#7B739B]">Collection Rate</p>
+              <p className="text-xs uppercase font-bold text-[#7B739B]">{t('page.collectionRate')}</p>
               <p className="text-2xl font-black text-[#2F7B56]">{metrics.collectionRate}%</p>
-              <p className="text-[10px] text-[#7B739B]">Kas Masuk / Tagihan</p>
+              <p className="text-[10px] text-[#7B739B]">{t('page.cashBilled')}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-xl">
               📈
@@ -153,21 +157,21 @@ export default function KPISalesOverview() {
       {/* Key Metric Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-3xl bg-white border border-[#DED9F4] shadow-sm">
-          <p className="text-xs font-semibold uppercase text-[#7B739B]">Total Transaksi Deal</p>
-          <p className="text-2xl font-bold text-[#322A5E] mt-1">{metrics.totalEvents} Acara</p>
-          <p className="text-xs text-[#7B739B] mt-1">Akumulasi seluruh event tercatat</p>
+          <p className="text-xs font-semibold uppercase text-[#7B739B]">{t('page.totalDeals')}</p>
+          <p className="text-2xl font-bold text-[#322A5E] mt-1">{metrics.totalEvents} {t('page.eventCount')}</p>
+          <p className="text-xs text-[#7B739B] mt-1">{t('page.allEvents')}</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white border border-[#DED9F4] shadow-sm">
-          <p className="text-xs font-semibold uppercase text-[#7B739B]">Rata-rata Nilai Deal (ARPU)</p>
+          <p className="text-xs font-semibold uppercase text-[#7B739B]">{t('page.averageDeal')}</p>
           <p className="text-2xl font-bold text-[#564B95] mt-1">{formatRupiah(metrics.avgDeal)}</p>
-          <p className="text-xs text-[#7B739B] mt-1">Rerata per paket dekorasi meja</p>
+          <p className="text-xs text-[#7B739B] mt-1">{t('page.averageDecor')}</p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white border border-[#DED9F4] shadow-sm">
-          <p className="text-xs font-semibold uppercase text-[#7B739B]">Outstanding Piutang (Kurang)</p>
+          <p className="text-xs font-semibold uppercase text-[#7B739B]">{t('page.outstanding')}</p>
           <p className="text-2xl font-bold text-[#A3432B] mt-1">{formatRupiah(metrics.totalPiutang)}</p>
-          <p className="text-xs text-[#7B739B] mt-1">Sisa tagihan yang belum dilunasi</p>
+          <p className="text-xs text-[#7B739B] mt-1">{t('page.outstandingDescription')}</p>
         </div>
       </div>
 
@@ -180,18 +184,18 @@ export default function KPISalesOverview() {
               <span className="text-xl">👑</span>
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#322A5E]">
-                  Atribusi Sales PIC
+                  {t('page.salesAttribution')}
                 </h3>
-                <p className="text-xs text-[#7B739B]">Kontribusi deal berdasarkan PIC</p>
+                <p className="text-xs text-[#7B739B]">{t('page.salesContribution')}</p>
               </div>
             </div>
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FFEDA8] text-[#7D6B14] border border-[#FAE489]">
-              {metrics.picList.length} PIC
+              {metrics.picList.length} {t('page.salesRep')}
             </span>
           </div>
 
           {metrics.picList.length === 0 ? (
-            <p className="text-xs text-[#7B739B] text-center py-8">Belum ada data sales PIC.</p>
+            <p className="text-xs text-[#7B739B] text-center py-8">{t('page.noSalesData')}</p>
           ) : (
             <div className="space-y-4">
               {metrics.picList.map((pic, idx) => (
@@ -221,10 +225,10 @@ export default function KPISalesOverview() {
 
                   <div className="flex items-center justify-between text-[11px] text-[#7B739B]">
                     <span>
-                      {pic.count} Acara | Kas Masuk: {formatRupiah(pic.transfer)}
+                      {pic.count} {t('page.eventCount')} | {t('page.cashLabel')}: {formatRupiah(pic.transfer)}
                     </span>
                     <span className="font-bold text-[#4A3E85]">
-                      {pic.percentage.toFixed(1)}% Share
+                      {pic.percentage.toFixed(1)}% {t('page.share')}
                     </span>
                   </div>
                 </div>
@@ -241,26 +245,26 @@ export default function KPISalesOverview() {
               <span className="text-xl">📅</span>
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#322A5E]">
-                  Tren Penjualan Bulanan
+                  {t('page.monthlyTrend')}
                 </h3>
-                <p className="text-xs text-[#7B739B]">Rekap omset menurut bulan pelaksanaan</p>
+                <p className="text-xs text-[#7B739B]">{t('page.monthlyRevenue')}</p>
               </div>
             </div>
 
             {metrics.monthList.length === 0 ? (
-              <p className="text-xs text-[#7B739B] text-center py-6">Belum ada data bulanan.</p>
+              <p className="text-xs text-[#7B739B] text-center py-6">{t('page.noMonthlyData')}</p>
             ) : (
               <div className="divide-y divide-[#F0EDF9]">
                 {metrics.monthList.map((m) => (
                   <div key={m.month} className="py-3 flex items-center justify-between text-xs">
                     <div>
                       <p className="font-bold text-[#322A5E] text-sm">{m.month}</p>
-                      <p className="text-[11px] text-[#7B739B]">{m.count} Acara Terjadwal</p>
+                      <p className="text-[11px] text-[#7B739B]">{m.count} {t('page.scheduledEvents')}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-[#322A5E] text-sm">{formatRupiah(m.omset)}</p>
                       <p className="text-[11px] text-[#2F7B56]">
-                        Kas: {formatRupiah(m.transfer)}
+                        {t('page.cashLabel')}: {formatRupiah(m.transfer)}
                       </p>
                     </div>
                   </div>
@@ -275,14 +279,14 @@ export default function KPISalesOverview() {
               <span className="text-xl">🏛️</span>
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#322A5E]">
-                  Top Lokasi / Venue Favorit
+                  {t('page.topVenues')}
                 </h3>
-                <p className="text-xs text-[#7B739B]">Venue yang paling sering dipesan klien</p>
+                <p className="text-xs text-[#7B739B]">{t('page.popularVenues')}</p>
               </div>
             </div>
 
             {metrics.topVenues.length === 0 ? (
-              <p className="text-xs text-[#7B739B] text-center py-4">Belum ada data venue.</p>
+              <p className="text-xs text-[#7B739B] text-center py-4">{t('page.noVenueData')}</p>
             ) : (
               <div className="space-y-2 pt-2">
                 {metrics.topVenues.map((v, i) => (
@@ -294,7 +298,7 @@ export default function KPISalesOverview() {
                       {i + 1}. {v.venue}
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-[#F4F2FB] text-[#564B95] font-bold text-[11px]">
-                      {v.count}x Acara
+                      {v.count}x {t('page.eventCount')}
                     </span>
                   </div>
                 ))}

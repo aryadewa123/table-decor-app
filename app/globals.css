@@ -31,6 +31,7 @@ html {
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22240%22%20viewBox%3D%220%200%20240%20240%22%3E%3Cg%20transform%3D%22translate%2840%2C40%29%22%3E%3Ccircle%20cx%3D%220%22%20cy%3D%22-16%22%20r%3D%2214%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%22-5%22%20r%3D%2214%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2214%22%20r%3D%2214%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%22-9%22%20cy%3D%2214%22%20r%3D%2214%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%22-15%22%20cy%3D%22-5%22%20r%3D%2214%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.35%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%228%22%20fill%3D%22%23FFEB3B%22%20fill-opacity%3D%220.45%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate%28175%2C150%29%22%3E%3Ccircle%20cx%3D%220%22%20cy%3D%22-12%22%20r%3D%2211%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%22-4%22%20r%3D%2211%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%227%22%20cy%3D%2211%22%20r%3D%2211%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%22-7%22%20cy%3D%2211%22%20r%3D%2211%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%22-11%22%20cy%3D%22-4%22%20r%3D%2211%22%20fill%3D%22%23FFD166%22%20fill-opacity%3D%220.25%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%226%22%20fill%3D%22%23FFEB3B%22%20fill-opacity%3D%220.35%22%2F%3E%3C%2Fg%3E%3Cellipse%20cx%3D%22170%22%20cy%3D%2255%22%20rx%3D%2230%22%20ry%3D%2212%22%20fill%3D%22%2306D6A0%22%20fill-opacity%3D%220.2%22%20transform%3D%22rotate%28-40%20170%2055%29%22%2F%3E%3Cellipse%20cx%3D%2275%22%20cy%3D%22175%22%20rx%3D%2226%22%20ry%3D%2211%22%20fill%3D%22%2306D6A0%22%20fill-opacity%3D%220.15%22%20transform%3D%22rotate%2835%2075%20175%29%22%2F%3E%3Cellipse%20cx%3D%22210%22%20cy%3D%22205%22%20rx%3D%2224%22%20ry%3D%2210%22%20fill%3D%22%2306D6A0%22%20fill-opacity%3D%220.12%22%20transform%3D%22rotate%28-25%20210%20205%29%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: repeat;
   background-size: 240px 240px;
+  background-attachment: fixed;
 }
 
 body {
@@ -69,25 +70,43 @@ body::before {
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes grow-width { from { width: 0; } }
+@keyframes bloom {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
 @keyframes sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
 @keyframes pulse-gold {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 223, 0, 0.4); }
   50% { box-shadow: 0 0 20px 8px rgba(255, 223, 0, 0.6); }
 }
-@keyframes shimmer {
-  0% { background-position: -800px 0; }
-  100% { background-position: 800px 0; }
+@keyframes floatPetal {
+  0% { transform: translateY(0) translateX(0) rotate(0deg) scale(0.8); opacity: 0.7; }
+  25% { transform: translateY(-120px) translateX(30px) rotate(45deg) scale(1.2); opacity: 0.5; }
+  50% { transform: translateY(-240px) translateX(-20px) rotate(-30deg) scale(0.9); opacity: 0.6; }
+  75% { transform: translateY(-180px) translateX(40px) rotate(60deg) scale(1.1); opacity: 0.4; }
+  100% { transform: translateY(-300px) translateX(0) rotate(0deg) scale(0.8); opacity: 0; }
 }
 
 .animate-fade-up { animation: fade-up 0.5s ease-out backwards; }
 .animate-page-in { animation: page-in 0.35s ease-out backwards; }
 .animate-grow-width { animation: grow-width 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.animate-bloom { animation: bloom 0.8s cubic-bezier(0.34, 1.25, 0.69, 1) forwards; }
 .animate-sway { animation: sway 4s ease-in-out infinite; }
 .animate-pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+.animate-float-petal { animation: floatPetal 15s ease-in-out infinite; }
 
 .stagger-children > * { animation: fade-up 0.5s ease-out backwards; }
 .stagger-children > *:nth-child(2) { animation-delay: 0.08s; }
 .stagger-children > *:nth-child(3) { animation-delay: 0.16s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(n + 5) { animation-delay: 0.32s; }
+
+.stagger-rows > tr { animation: fade-up 0.4s ease-out backwards; }
+.stagger-rows > tr:nth-child(2) { animation-delay: 0.05s; }
+.stagger-rows > tr:nth-child(3) { animation-delay: 0.1s; }
+.stagger-rows > tr:nth-child(4) { animation-delay: 0.15s; }
+.stagger-rows > tr:nth-child(n + 5) { animation-delay: 0.2s; }
 
 .skeleton {
   background: linear-gradient(90deg, #eae5f7 25%, #f7f5fc 50%, #eae5f7 75%);
@@ -95,31 +114,56 @@ body::before {
   animation: shimmer 1.4s linear infinite;
 }
 
-/* ===== Content Z-Index ===== */
-main { position: relative; z-index: 10; }
+.btn-floral:hover { animation: pulse-gold 1.5s ease-in-out; }
 
-/* ===== Floral Divider ===== */
-.floral-divider {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #DED9F4, transparent);
-  position: relative;
+.card-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fade-up 0.5s ease-out forwards;
 }
-.floral-divider::after {
-  content: "\1F338";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #FAF9F6;
-  padding: 0 12px;
-  font-size: 14px;
-}
+.card-enter:nth-child(1) { animation-delay: 0.1s; }
+.card-enter:nth-child(2) { animation-delay: 0.15s; }
+.card-enter:nth-child(3) { animation-delay: 0.2s; }
+.card-enter:nth-child(4) { animation-delay: 0.25s; }
+
+/* ===== Content Z-Index ===== */
+main, .content-wrapper { position: relative; z-index: 10; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+html {
+  overscroll-behavior-y: none;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    background-attachment: scroll;
+  }
+
+  body::before {
+    animation: none;
   }
 }

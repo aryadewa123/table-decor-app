@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { EventRecord, PaymentStatus } from '@/lib/types'
 import { AnimatePresence, motion } from 'motion/react'
+import { useAuth } from '@/lib/auth-context'
+import { translate } from '@/lib/i18n'
 
 interface EventModalProps {
   isOpen: boolean
@@ -30,67 +32,49 @@ export default function EventModal({
   eventToEdit,
 }: EventModalProps) {
   const isEdit = Boolean(eventToEdit)
+  const { user } = useAuth()
+  const t = (key: Parameters<typeof translate>[1]) =>
+    translate(user?.language ?? 'id', key)
 
-  const [dealingDate, setDealingDate] = useState('')
-  const [eventDate, setEventDate] = useState('')
-  const [clientName, setClientName] = useState('')
-  const [decorType, setDecorType] = useState('Table Decor')
-  const [customDecorType, setCustomDecorType] = useState('')
-  const [venue, setVenue] = useState('')
-  const [totalAmount, setTotalAmount] = useState<number | ''>('')
-  const [transferAmount, setTransferAmount] = useState<number | ''>('')
-  const [status, setStatus] = useState<PaymentStatus>('DP')
-  const [salesPic, setSalesPic] = useState('Ce Loren')
-  const [customPic, setCustomPic] = useState('')
-  const [chargeOvertime, setChargeOvertime] = useState<number | ''>(0)
-  const [notes, setNotes] = useState('')
+  const today = new Date().toISOString().split('T')[0]
+  const [dealingDate, setDealingDate] = useState(eventToEdit?.dealing_date || today)
+  const [eventDate, setEventDate] = useState(eventToEdit?.event_date || today)
+  const [clientName, setClientName] = useState(eventToEdit?.client_name || '')
+  const [decorType, setDecorType] = useState(
+    eventToEdit && !COMMON_DECOR_TYPES.includes(eventToEdit.decor_type)
+      ? 'Custom'
+      : eventToEdit?.decor_type || 'Table Decor'
+  )
+  const [customDecorType, setCustomDecorType] = useState(
+    eventToEdit && !COMMON_DECOR_TYPES.includes(eventToEdit.decor_type)
+      ? eventToEdit.decor_type
+      : ''
+  )
+  const [venue, setVenue] = useState(eventToEdit?.venue || '')
+  const [totalAmount, setTotalAmount] = useState<number | ''>(
+    eventToEdit?.total_amount ?? ''
+  )
+  const [transferAmount, setTransferAmount] = useState<number | ''>(
+    eventToEdit?.transfer_amount ?? ''
+  )
+  const [status, setStatus] = useState<PaymentStatus>(eventToEdit?.status || 'DP')
+  const [salesPic, setSalesPic] = useState(
+    eventToEdit && !COMMON_SALES_PICS.includes(eventToEdit.sales_pic || '')
+      ? 'Lainnya'
+      : eventToEdit?.sales_pic || 'Ce Loren'
+  )
+  const [customPic, setCustomPic] = useState(
+    eventToEdit && !COMMON_SALES_PICS.includes(eventToEdit.sales_pic || '')
+      ? eventToEdit.sales_pic || ''
+      : ''
+  )
+  const [chargeOvertime, setChargeOvertime] = useState<number | ''>(
+    eventToEdit?.charge_overtime ?? 0
+  )
+  const [notes, setNotes] = useState(eventToEdit?.notes || '')
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (eventToEdit) {
-      setDealingDate(eventToEdit.dealing_date || '')
-      setEventDate(eventToEdit.event_date || '')
-      setClientName(eventToEdit.client_name || '')
-      if (COMMON_DECOR_TYPES.includes(eventToEdit.decor_type)) {
-        setDecorType(eventToEdit.decor_type)
-        setCustomDecorType('')
-      } else {
-        setDecorType('Custom')
-        setCustomDecorType(eventToEdit.decor_type)
-      }
-      setVenue(eventToEdit.venue || '')
-      setTotalAmount(eventToEdit.total_amount ?? 0)
-      setTransferAmount(eventToEdit.transfer_amount ?? 0)
-      setStatus(eventToEdit.status || 'DP')
-      if (COMMON_SALES_PICS.includes(eventToEdit.sales_pic || '')) {
-        setSalesPic(eventToEdit.sales_pic || 'Ce Loren')
-        setCustomPic('')
-      } else {
-        setSalesPic('Lainnya')
-        setCustomPic(eventToEdit.sales_pic || '')
-      }
-      setChargeOvertime(eventToEdit.charge_overtime ?? 0)
-      setNotes(eventToEdit.notes || '')
-    } else {
-      const today = new Date().toISOString().split('T')[0]
-      setDealingDate(today)
-      setEventDate(today)
-      setClientName('')
-      setDecorType('Table Decor')
-      setCustomDecorType('')
-      setVenue('')
-      setTotalAmount('')
-      setTransferAmount('')
-      setStatus('DP')
-      setSalesPic('Ce Loren')
-      setCustomPic('')
-      setChargeOvertime(0)
-      setNotes('')
-    }
-    setError(null)
-  }, [eventToEdit, isOpen])
 
   const numTotal = Number(totalAmount) || 0
   const numTransfer = Number(transferAmount) || 0
@@ -109,7 +93,7 @@ export default function EventModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!clientName.trim() || !venue.trim() || totalAmount === '') {
-      setError('Mohon lengkapi Nama Klien, Venue, dan Total Tagihan.')
+      setError(t('eventModal.fillRequired'))
       return
     }
 
@@ -188,10 +172,10 @@ export default function EventModal({
             </div>
             <div>
               <h2 className="font-serif text-xl font-bold text-[#322A5E]">
-                {isEdit ? 'Perbarui Rekap Deal Event' : 'Catat Rekap Deal Baru'}
+                {isEdit ? t('eventModal.editTitle') : t('eventModal.newTitle')}
               </h2>
               <p className="text-xs text-[#7B739B]">
-                Pastikan data omset &amp; pembayaran tersimpan presisi
+                {t('eventModal.subtitle')}
               </p>
             </div>
           </div>
@@ -220,7 +204,7 @@ export default function EventModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Tanggal Dealing (Deal Date) *
+                {t('eventModal.dealDate')}
               </label>
               <input
                 type="date"
@@ -233,7 +217,7 @@ export default function EventModal({
 
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Tanggal Event Pelaksanaan *
+                {t('eventModal.eventDate')}
               </label>
               <input
                 type="date"
@@ -248,13 +232,13 @@ export default function EventModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Nama Klien *
+                {t('eventModal.client')}
               </label>
               <input
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                placeholder="Contoh: Jessica & Michael, Ajeng, dll."
+                placeholder="e.g. Jessica & Michael, Ajeng"
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] placeholder-[#B5B0CC] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
               />
@@ -262,7 +246,7 @@ export default function EventModal({
 
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Sales / PIC
+                {t('eventModal.sales')}
               </label>
               <div className="flex gap-2">
                 <select
@@ -281,7 +265,7 @@ export default function EventModal({
                     type="text"
                     value={customPic}
                     onChange={(e) => setCustomPic(e.target.value)}
-                    placeholder="Nama PIC..."
+                    placeholder={user?.language === 'en' ? 'Representative name' : 'Nama PIC...'}
                     className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
                   />
                 )}
@@ -292,7 +276,7 @@ export default function EventModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Tipe Dekorasi
+                {t('eventModal.decor')}
               </label>
               <select
                 value={decorType}
@@ -304,14 +288,14 @@ export default function EventModal({
                     {type}
                   </option>
                 ))}
-                <option value="Custom">-- Tulis Custom --</option>
+                <option value="Custom">{t('eventModal.custom')}</option>
               </select>
               {decorType === 'Custom' && (
                 <input
                   type="text"
                   value={customDecorType}
                   onChange={(e) => setCustomDecorType(e.target.value)}
-                  placeholder="Spesifikasi jenis dekor..."
+                  placeholder={user?.language === 'en' ? 'Describe the decor type...' : 'Spesifikasi jenis dekor...'}
                   className="mt-2 w-full px-3.5 py-2 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
                 />
               )}
@@ -319,13 +303,13 @@ export default function EventModal({
 
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Venue / Lokasi Acara *
+                {t('eventModal.venue')}
               </label>
               <input
                 type="text"
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                placeholder="Contoh: Palimanan, Hotel Majapahit, Rumah Klien"
+                placeholder="e.g. Palimanan, Hotel Majapahit, client home"
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] placeholder-[#B5B0CC] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
               />
@@ -335,15 +319,15 @@ export default function EventModal({
           <div className="p-4 rounded-2xl bg-gradient-to-br from-[#F5F3FB] to-[#FFFDF2] border border-[#DED9F4] space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-[#564B95]">
-                💰 Finansial &amp; Rekap Pembayaran
+                💰 {t('eventModal.financial')}
               </span>
-              <span className="text-xs text-[#7B739B]">Validasi Nilai Numerik</span>
+              <span className="text-xs text-[#7B739B]">{t('eventModal.numeric')}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-medium text-[#6D658E] mb-1">
-                  Total Tagihan (Rp) *
+                  {t('eventModal.total')}
                 </label>
                 <input
                   type="number"
@@ -361,7 +345,7 @@ export default function EventModal({
 
               <div>
                 <label className="block text-[11px] font-medium text-[#6D658E] mb-1">
-                  Sudah Ditransfer / DP (Rp)
+                  {t('eventModal.transfer')}
                 </label>
                 <input
                   type="number"
@@ -380,13 +364,13 @@ export default function EventModal({
 
               <div>
                 <label className="block text-[11px] font-medium text-[#6D658E] mb-1">
-                  Sisa Piutang (Kurang)
+                  {t('eventModal.remaining')}
                 </label>
                 <div className="w-full px-3 py-2 rounded-xl bg-[#FFFDF0] border border-[#FAE489] text-sm font-bold text-[#A3432B] flex items-center justify-between">
                   <span>Rp {remaining.toLocaleString('id-ID')}</span>
                   {remaining === 0 && numTotal > 0 && (
                     <span className="text-[10px] text-green-700 bg-green-100 px-1.5 py-0.5 rounded">
-                      LUNAS
+                      {t('eventModal.paid')}
                     </span>
                   )}
                 </div>
@@ -395,7 +379,7 @@ export default function EventModal({
 
             <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#DED9F4]/60">
               <span className="text-xs font-medium text-[#6D658E]">
-                Status Pembayaran:
+                {t('eventModal.paymentStatus')}:
               </span>
               {(['DP', 'Lunas', 'Kurang', 'Batal'] as PaymentStatus[]).map((s) => (
                 <motion.button
@@ -424,7 +408,7 @@ export default function EventModal({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Charge Overtime (Rp)
+                {t('eventModal.overtime')}
               </label>
               <input
                 type="number"
@@ -443,13 +427,13 @@ export default function EventModal({
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
-                Catatan Khusus / Request Klien
+                {t('eventModal.notes')}
               </label>
               <input
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Contoh: Tema Rustic Lavender, meja bulat 10 pax, lighting warm"
+                placeholder="e.g. Rustic lavender theme, round table for 10, warm lighting"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] placeholder-[#B5B0CC] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
               />
             </div>
@@ -462,7 +446,7 @@ export default function EventModal({
               disabled={submitting}
               className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[#6D658E] hover:bg-[#F0EDF9] border border-[#DED9F4] transition"
             >
-              Batal
+              {t('eventModal.cancel')}
             </button>
 
             <button
@@ -471,9 +455,9 @@ export default function EventModal({
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#322A5E] bg-[#FFEDA8] hover:bg-[#FFE892] active:scale-95 transition-all shadow-md shadow-[#FFEDA8]/40 border border-[#FAE489] disabled:opacity-50"
             >
               {submitting ? (
-                <span>Menyimpan...</span>
+                <span>{t('eventModal.saving')}</span>
               ) : (
-                <span>{isEdit ? 'Simpan Perubahan' : '✓ Simpan Rekap Event'}</span>
+                <span>{isEdit ? t('eventModal.saveChanges') : t('eventModal.saveNew')}</span>
               )}
             </button>
           </div>
