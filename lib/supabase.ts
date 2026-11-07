@@ -17,11 +17,4 @@ if (!supabaseAnonKey) {
   )
 }
 
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-  cookieOptions: {
-    path: '/',
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  },
-})
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
