@@ -31,10 +31,10 @@ export default function BottomNav() {
   const moreItems = [
     { href: '/recap', label: t('nav.recap'), icon: DocumentIcon },
     { href: '/inventory', label: t('nav.inventory'), icon: BoxIcon },
-    { href: '/settings', label: t('nav.settings'), icon: null },
+    { href: null, label: t('nav.briefDecor'), icon: null, comingSoon: true },
   ]
   const isMoreActive = moreItems.some(
-    item => pathname === item.href || pathname.startsWith(`${item.href}/`)
+    item => item.href !== null && (pathname === item.href || pathname.startsWith(`${item.href}/`))
   )
 
   return (
@@ -102,6 +102,36 @@ export default function BottomNav() {
           className="app-glass-surface nav-dock-more-menu absolute bottom-[calc(100%+0.75rem)] right-3 z-10 w-52 rounded-2xl p-2 sm:right-5"
         >
           {moreItems.map((item) => {
+            if (!item.href) {
+              return (
+                <div
+                  key={item.label}
+                  role="menuitem"
+                  aria-disabled="true"
+                  className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-3 text-sm text-[#756b86]/75"
+                >
+                  <svg
+                    className="h-5 w-5 shrink-0 text-[#9A83B6]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 12c-1.6-2.2-4.1-2.5-5.7-.9-1.5 1.5-1.3 4 .9 5.7 2.2 1.6 4.8 1.2 5.2-1.4 2.6.4 3-2.2 1.4-5.2-1.7-2.2-4.2-2.4-5.7-.9" />
+                    <circle cx="12" cy="12" r="1.6" />
+                    <path d="M12 13.8v6M12 17c-1.3-1.7-2.6-2-3.8-1.7M12 18c1.3-1.6 2.4-1.9 3.8-1.6" />
+                  </svg>
+                  <span className="flex-1">{item.label}</span>
+                  <span className="rounded-full border border-[#CDBDE0]/70 bg-white/45 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#8B769F]">
+                    {t('nav.comingSoon')}
+                  </span>
+                </div>
+              )
+            }
+
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const IconComponent = item.icon
 

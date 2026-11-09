@@ -6,6 +6,8 @@ import type { EventRecord, PaymentStatus } from '@/lib/types'
 import { AnimatePresence, motion } from 'motion/react'
 import { useAuth } from '@/lib/auth-context'
 import { translate } from '@/lib/i18n'
+import FloralDatePicker, { getLocalDateValue } from '@/components/FloralDatePicker'
+import FloralSelect from '@/components/FloralSelect'
 
 interface EventModalProps {
   isOpen: boolean
@@ -36,7 +38,8 @@ export default function EventModal({
   const t = (key: Parameters<typeof translate>[1]) =>
     translate(user?.language ?? 'id', key)
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateValue(new Date())
+  const language = user?.language ?? 'id'
   const [dealingDate, setDealingDate] = useState(eventToEdit?.dealing_date || today)
   const [eventDate, setEventDate] = useState(eventToEdit?.event_date || today)
   const [clientName, setClientName] = useState(eventToEdit?.client_name || '')
@@ -203,28 +206,28 @@ export default function EventModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
+              <label id="event-deal-date-label" className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
                 {t('eventModal.dealDate')}
               </label>
-              <input
-                type="date"
+              <FloralDatePicker
+                id="event-deal-date"
+                labelledBy="event-deal-date-label"
                 value={dealingDate}
-                onChange={(e) => setDealingDate(e.target.value)}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
+                onChange={setDealingDate}
+                language={language}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
+              <label id="event-date-label" className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
                 {t('eventModal.eventDate')}
               </label>
-              <input
-                type="date"
+              <FloralDatePicker
+                id="event-date"
+                labelledBy="event-date-label"
                 value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
+                onChange={setEventDate}
+                language={language}
               />
             </div>
           </div>
@@ -249,17 +252,13 @@ export default function EventModal({
                 {t('eventModal.sales')}
               </label>
               <div className="flex gap-2">
-                <select
+                <FloralSelect
                   value={salesPic}
-                  onChange={(e) => setSalesPic(e.target.value)}
-                  className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-                >
-                  {COMMON_SALES_PICS.map((pic) => (
-                    <option key={pic} value={pic}>
-                      {pic}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSalesPic}
+                  ariaLabel={t('eventModal.sales')}
+                  className="min-w-0 flex-1"
+                  options={COMMON_SALES_PICS.map((pic) => ({ value: pic, label: pic }))}
+                />
                 {salesPic === 'Lainnya' && (
                   <input
                     type="text"
@@ -278,18 +277,16 @@ export default function EventModal({
               <label className="block text-xs font-semibold text-[#564B95] mb-1.5 uppercase tracking-wider">
                 {t('eventModal.decor')}
               </label>
-              <select
+              <FloralSelect
                 value={decorType}
-                onChange={(e) => setDecorType(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#DED9F4] text-sm text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-              >
-                {COMMON_DECOR_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-                <option value="Custom">{t('eventModal.custom')}</option>
-              </select>
+                onChange={setDecorType}
+                ariaLabel={t('eventModal.decor')}
+                className="w-full"
+                options={[
+                  ...COMMON_DECOR_TYPES.map((type) => ({ value: type, label: type })),
+                  { value: 'Custom', label: t('eventModal.custom') },
+                ]}
+              />
               {decorType === 'Custom' && (
                 <input
                   type="text"

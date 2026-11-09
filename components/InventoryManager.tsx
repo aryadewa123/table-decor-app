@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 import { translate } from '@/lib/i18n'
 import type { InventoryCategory, InventoryItem, ItemVariant } from '@/lib/types'
+import FloralSelect from '@/components/FloralSelect'
 
 export default function InventoryManager() {
   const { user } = useAuth()
@@ -415,21 +416,20 @@ export default function InventoryManager() {
 
             <form onSubmit={handleCreateItem} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#564B95] mb-1">
+                <label id="inventory-new-category-label" className="block font-semibold text-[#564B95] mb-1">
                   {t('inventory.categoryRequired')}
                 </label>
-                <select
+                <FloralSelect
                   value={newItemCategoryId}
-                  onChange={(e) => setNewItemCategoryId(e.target.value)}
+                  onChange={setNewItemCategoryId}
+                  ariaLabelledBy="inventory-new-category-label"
                   required
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.category_name} ({c.category_code})
-                    </option>
-                  ))}
-                </select>
+                  className="w-full"
+                  options={categories.map((category) => ({
+                    value: category.id,
+                    label: `${category.category_name} (${category.category_code})`,
+                  }))}
+                />
               </div>
 
               <div>
@@ -448,20 +448,22 @@ export default function InventoryManager() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#564B95] mb-1">
+                  <label id="inventory-new-unit-label" className="block font-semibold text-[#564B95] mb-1">
                     {t('inventory.unitLabel')}
                   </label>
-                  <select
+                  <FloralSelect
                     value={newItemUnit}
-                    onChange={(e) => setNewItemUnit(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-                  >
-                    <option value="pcs">pcs</option>
-                    <option value="set">set</option>
-                    <option value="batang">batang</option>
-                    <option value="meter">meter</option>
-                    <option value="roll">roll</option>
-                  </select>
+                    onChange={setNewItemUnit}
+                    ariaLabelledBy="inventory-new-unit-label"
+                    className="w-full"
+                    options={[
+                      { value: 'pcs', label: 'pcs' },
+                      { value: 'set', label: 'set' },
+                      { value: 'batang', label: 'batang' },
+                      { value: 'meter', label: 'meter' },
+                      { value: 'roll', label: 'roll' },
+                    ]}
+                  />
                 </div>
 
                 <div>

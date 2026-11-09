@@ -8,6 +8,7 @@ import TopHeader from '@/components/TopHeader'
 import { useAuth } from '@/lib/auth-context'
 import { translate, type AppLanguage } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
+import FloralSelect from '@/components/FloralSelect'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -300,21 +301,23 @@ export default function SettingsPage() {
             <p className="text-sm text-[#7B739B] mt-1 mb-4">
               {t('settings.languageDescription')}
             </p>
-            <select
+            <FloralSelect
               value={language}
-              onChange={(event) => {
+              onChange={(value) => {
                 if (profile) {
                   setDraft({
                     ...profile,
-                    language: event.target.value as AppLanguage,
+                    language: value === 'en' ? 'en' : 'id',
                   })
                 }
               }}
-              className="w-full sm:max-w-sm rounded-xl border border-[#DED9F4] bg-white px-3.5 py-2.5 text-sm text-[#2D2A3E] outline-none focus:ring-2 focus:ring-[#B1A9DA]/50"
-            >
-              <option value="id">{t('settings.indonesian')}</option>
-              <option value="en">{t('settings.english')}</option>
-            </select>
+              ariaLabel={t('settings.language')}
+              className="w-full sm:max-w-sm"
+              options={[
+                { value: 'id', label: t('settings.indonesian') },
+                { value: 'en', label: t('settings.english') },
+              ]}
+            />
           </section>
 
           <button

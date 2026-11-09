@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { translate } from '@/lib/i18n'
 import type { EventRecord, PaymentStatus } from '@/lib/types'
 import EventModal from '@/components/EventModal'
+import FloralSelect from '@/components/FloralSelect'
 
 interface EventManagerProps {
   isModalOpen: boolean
@@ -353,30 +354,34 @@ export default function EventManager({
         <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#F0EDF9] text-xs">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[#6D658E]">{t('events.status')}:</span>
-            <select
+            <FloralSelect
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[#FAF9F6] border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-            >
-              <option value="all">{t('events.allStatuses')}</option>
-              <option value="Lunas">{t('events.paid')}</option>
-              <option value="DP">{t('events.downPayment')}</option>
-              <option value="Kurang">{t('events.balanceDue')}</option>
-              <option value="Batal">{t('events.canceled')}</option>
-            </select>
+              onChange={setSelectedStatus}
+              ariaLabel={t('events.status')}
+              className="min-w-[150px]"
+              options={[
+                { value: 'all', label: t('events.allStatuses') },
+                { value: 'Lunas', label: t('events.paid') },
+                { value: 'DP', label: t('events.downPayment') },
+                { value: 'Kurang', label: t('events.balanceDue') },
+                { value: 'Batal', label: t('events.canceled') },
+              ]}
+            />
           </div>
 
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[#6D658E]">{t('events.salesPic')}:</span>
-            <select
+            <FloralSelect
               value={selectedPic}
-              onChange={(e) => setSelectedPic(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[#FAF9F6] border border-[#DED9F4] text-[#322A5E] focus:outline-none focus:ring-2 focus:ring-[#B1A9DA]"
-            >
-              <option value="all">{t('events.allSales')}</option>
-              <option value="Ce Loren">Ce Loren</option>
-              <option value="Arsita">Arsita</option>
-            </select>
+              onChange={setSelectedPic}
+              ariaLabel={t('events.salesPic')}
+              className="min-w-[150px]"
+              options={[
+                { value: 'all', label: t('events.allSales') },
+                { value: 'Ce Loren', label: 'Ce Loren' },
+                { value: 'Arsita', label: 'Arsita' },
+              ]}
+            />
           </div>
 
           <button

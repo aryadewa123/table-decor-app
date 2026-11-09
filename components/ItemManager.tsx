@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Category, Item } from '@/lib/types'
+import FloralSelect from '@/components/FloralSelect'
 
 export default function ItemManager() {
   const [items, setItems] = useState<Item[]>([])
@@ -123,22 +124,22 @@ export default function ItemManager() {
             required
           />
 
-          <select
-            value={categoryId}
-            onChange={(e) =>
-              setCategoryId(e.target.value ? Number(e.target.value) : '')
-            }
-            className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
-            disabled={submitting}
+          <FloralSelect
+            value={categoryId === '' ? '' : String(categoryId)}
+            onChange={(value) => setCategoryId(value ? Number(value) : '')}
+            ariaLabel="Pilih Kategori"
+            placeholder="-- Pilih Kategori --"
             required
-          >
-            <option value="">-- Pilih Kategori --</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            className="w-full"
+            disabled={submitting}
+            options={[
+              { value: '', label: '-- Pilih Kategori --' },
+              ...categories.map((category) => ({
+                value: String(category.id),
+                label: category.name,
+              })),
+            ]}
+          />
 
           <input
             type="number"

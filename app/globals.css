@@ -371,6 +371,276 @@ body {
   100% { scale: 1; }
 }
 
+.floral-select {
+  position: relative;
+  min-width: 0;
+}
+
+.floral-select__trigger,
+.floral-date-picker__trigger {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid rgba(177, 169, 218, 0.52);
+  border-radius: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  color: #322a5e;
+  text-align: left;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.97), rgba(250, 248, 255, 0.91) 58%, rgba(255, 247, 251, 0.93));
+  box-shadow: 0 5px 16px rgba(67, 52, 104, 0.07), 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.floral-select__trigger:hover,
+.floral-date-picker__trigger:hover {
+  border-color: rgba(129, 108, 183, 0.72);
+  box-shadow: 0 8px 22px rgba(67, 52, 104, 0.12), 0 0 0 3px rgba(177, 169, 218, 0.12);
+}
+
+.floral-select__trigger:focus-visible,
+.floral-date-picker__trigger:focus-visible,
+.floral-select__option:focus-visible,
+.floral-date-picker__day:focus-visible,
+.floral-date-picker__month-button:focus-visible {
+  outline: 3px solid rgba(129, 108, 183, 0.3);
+  outline-offset: 2px;
+}
+
+.floral-select__trigger.is-open,
+.floral-date-picker__trigger.is-open {
+  border-color: rgba(129, 108, 183, 0.82);
+  box-shadow: 0 0 0 3px rgba(177, 169, 218, 0.17), 0 9px 24px rgba(67, 52, 104, 0.1);
+}
+
+.floral-select__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.floral-select__placeholder {
+  color: #9991aa;
+}
+
+.floral-select__chevron {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: #786b96;
+  transition: transform 200ms ease;
+}
+
+.floral-select__chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.floral-select__menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 100%;
+  max-width: min(22rem, calc(100vw - 2.5rem));
+  max-height: min(18rem, 45vh);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 1rem;
+  padding: 0.35rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(247, 242, 255, 0.94) 56%, rgba(255, 243, 249, 0.95));
+  box-shadow: 0 18px 48px rgba(48, 36, 76, 0.22), 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  -webkit-backdrop-filter: blur(26px) saturate(165%);
+  backdrop-filter: blur(26px) saturate(165%);
+  animation: floral-menu-appear 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.floral-select__option {
+  display: flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.75rem;
+  color: #52466e;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.floral-select__option.is-active {
+  background: rgba(224, 214, 244, 0.58);
+  color: #3b315d;
+}
+
+.floral-select__option.is-selected {
+  color: #4a3e85;
+  font-weight: 650;
+}
+
+.floral-select__option.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@keyframes floral-menu-appear {
+  from { opacity: 0; transform: translateY(-4px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.floral-date-picker {
+  position: relative;
+  min-width: 0;
+}
+
+.floral-date-picker__trigger {
+  min-height: 2.9rem;
+  padding-inline: 0.95rem;
+}
+
+.floral-date-picker__calendar {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  z-index: 70;
+  width: min(20rem, calc(100vw - 2.5rem));
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 1.2rem;
+  padding: 0.85rem;
+  color: #3c315e;
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(228, 213, 247, 0.72), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(248, 244, 255, 0.96) 58%, rgba(255, 244, 249, 0.97));
+  box-shadow: 0 22px 60px rgba(45, 33, 75, 0.26), 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  backdrop-filter: blur(28px) saturate(165%);
+  animation: floral-menu-appear 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.floral-date-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.1rem 0 0.8rem;
+}
+
+.floral-date-picker__month {
+  color: #3b315d;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.floral-date-picker__month-button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(177, 169, 218, 0.35);
+  border-radius: 0.7rem;
+  color: #655486;
+  background: rgba(255, 255, 255, 0.58);
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.floral-date-picker__month-button:hover {
+  transform: scale(1.06);
+  background: white;
+}
+
+.floral-date-picker__month-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.floral-date-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.22rem;
+  text-align: center;
+}
+
+.floral-date-picker__weekday {
+  padding: 0.25rem 0;
+  color: #9389a5;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.floral-date-picker__day {
+  display: grid;
+  min-width: 0;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  color: #4e4564;
+  background: transparent;
+  font-size: 0.8rem;
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.floral-date-picker__day:hover {
+  transform: scale(1.08);
+  background: rgba(225, 214, 244, 0.65);
+}
+
+.floral-date-picker__day.is-outside {
+  color: #b7b0c2;
+}
+
+.floral-date-picker__day.is-today {
+  border-color: rgba(138, 116, 188, 0.42);
+  color: #4a3e85;
+  font-weight: 700;
+}
+
+.floral-date-picker__day.is-selected {
+  border-color: transparent;
+  color: white;
+  background: linear-gradient(135deg, #705c9b, #b27da4);
+  box-shadow: 0 5px 14px rgba(92, 70, 127, 0.27);
+}
+
+.floral-date-picker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  border-top: 1px solid rgba(177, 169, 218, 0.25);
+  padding-top: 0.6rem;
+  color: #91879f;
+  font-size: 0.7rem;
+}
+
+.floral-date-picker__footer button {
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  color: #554674;
+  background: rgba(225, 214, 244, 0.5);
+  font-weight: 650;
+  transition: background 150ms ease;
+}
+
+.floral-date-picker__footer button:hover {
+  background: rgba(214, 197, 240, 0.8);
+}
+
 .login-photo-motion {
   animation: login-photo-drift 28s ease-in-out infinite;
 }
@@ -1222,6 +1492,21 @@ html {
     0 18px 46px rgba(65, 47, 98, 0.2),
     0 1px 0 rgba(255, 255, 255, 0.82) inset,
     0 -1px 0 rgba(189, 161, 220, 0.14) inset;
+}
+
+.profile-menu {
+  border-color: rgba(255, 255, 255, 0.72);
+  background:
+    linear-gradient(138deg, rgba(226, 212, 247, 0.68), rgba(255, 255, 255, 0.56) 52%, rgba(251, 220, 238, 0.64));
+  box-shadow: 0 20px 56px rgba(58, 42, 84, 0.22), 0 1px 0 rgba(255, 255, 255, 0.84) inset;
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  animation: floral-menu-appear 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top right;
+}
+
+.profile-menu-item:active {
+  transform: scale(0.98);
 }
 
 .nav-dock-item {
