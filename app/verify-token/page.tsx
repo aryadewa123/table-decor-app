@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
+import { AuthFlowerBackdrop, AuthInteractionEffects } from '@/components/AuthFlowerEffects'
 
 function VerifyTokenForm() {
   const router = useRouter()
@@ -54,15 +55,9 @@ function VerifyTokenForm() {
   }
 
   return (
-    <main className="verify-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8 text-white sm:px-6 sm:py-12">
-      <div
-        role="img"
-        aria-label="Hamparan bunga lavender saat matahari terbenam"
-        className="verify-photo absolute inset-0 z-0 bg-cover bg-center"
-      />
-      <div className="verify-scene-wash absolute inset-0 z-[1]" />
-      <div className="verify-scene-glow verify-scene-glow--one absolute z-[2]" />
-      <div className="verify-scene-glow verify-scene-glow--two absolute z-[2]" />
+    <main data-auth-interaction-root className="verify-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8 text-white sm:px-6 sm:py-12">
+      <AuthFlowerBackdrop scene="verify" />
+      <AuthInteractionEffects />
 
       <div className="verify-ripple z-[3]" aria-hidden="true">
         <span />
@@ -195,13 +190,7 @@ export default function VerifyTokenPage() {
     <Suspense
       fallback={
         <div className="verify-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden p-4 text-white">
-          <div
-            role="img"
-            aria-label="Hamparan bunga lavender saat matahari terbenam"
-            className="verify-photo absolute inset-0 z-0 bg-cover bg-center"
-          />
-          <div className="verify-scene-wash absolute inset-0 z-[1]" />
-          <div className="verify-scene-glow verify-scene-glow--one absolute z-[2]" />
+          <AuthFlowerBackdrop scene="verify" />
           <section className="login-glass-panel relative z-10 w-full max-w-[440px] rounded-[28px] px-6 py-10 text-center sm:rounded-[32px] sm:px-10">
             <div className="login-glass-inner pointer-events-none absolute inset-0" />
             <div className="relative">

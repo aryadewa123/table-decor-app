@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { AuthFlowerBackdrop, AuthInteractionEffects } from '@/components/AuthFlowerEffects'
 
 type UserRole = 'Sales Staff' | 'Lead Sales' | 'Owner'
 
@@ -69,29 +70,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="signup-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-6 text-white sm:px-6 sm:py-10">
-      <div
-        role="img"
-        aria-label="Bunga poppy berwarna keemasan"
-        className="signup-photo login-photo-motion absolute inset-0 z-0 bg-cover bg-center"
-      />
-      <div className="login-scene-wash absolute inset-0 z-[1]" />
-      <div className="login-scene-glow login-scene-glow--one absolute z-[2]" />
-      <div className="login-scene-glow login-scene-glow--two absolute z-[2]" />
-      <div className="pointer-events-none absolute inset-0 z-[3] overflow-hidden" aria-hidden="true">
-        <span className="login-petal login-petal--one" />
-        <span className="login-petal login-petal--two" />
-        <span className="login-petal login-petal--three" />
-        <span className="login-petal login-petal--four" />
-        <span className="login-petal login-petal--leaf login-petal--five" />
-        <span className="login-petal login-petal--leaf login-petal--six" />
-        <span className="login-petal login-petal--leaf login-petal--seven" />
-        <span className="login-petal login-petal--leaf login-petal--eight" />
-        <span className="login-petal login-petal--leaf login-petal--nine" />
-        <span className="login-petal login-petal--leaf login-petal--ten" />
-        <span className="login-petal login-petal--leaf login-petal--eleven" />
-        <span className="login-petal login-petal--leaf login-petal--twelve" />
-      </div>
+    <main data-auth-interaction-root className="signup-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-6 text-white sm:px-6 sm:py-10">
+      <AuthFlowerBackdrop scene="signup" />
+      <AuthInteractionEffects />
 
       <section className="login-glass-panel relative z-10 w-full max-w-[510px] overflow-hidden rounded-[28px] px-5 py-6 sm:rounded-[32px] sm:px-10 sm:py-9 lg:px-12">
         <div className="login-glass-inner pointer-events-none absolute inset-0" />

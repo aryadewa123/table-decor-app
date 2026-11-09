@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { supabase } from '@/lib/supabase'
 import { GoogleIcon } from '@/components/icons/Icons'
+import { AuthFlowerBackdrop, AuthInteractionEffects } from '@/components/AuthFlowerEffects'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -57,40 +58,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="login-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8 text-white sm:px-6 sm:py-12">
-      <div
-        role="img"
-        aria-label="Bunga poppy berwarna keemasan"
-        className="login-photo-motion absolute inset-0 -z-30 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=2000&q=90')",
-        }}
-      />
-      <div className="login-scene-wash absolute inset-0 -z-20" />
-      <div className="login-scene-glow login-scene-glow--one absolute -z-10" />
-      <div className="login-scene-glow login-scene-glow--two absolute -z-10" />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="login-petal login-petal--one" aria-hidden="true" />
-        <div className="login-petal login-petal--two" aria-hidden="true" />
-        <div className="login-petal login-petal--three" aria-hidden="true" />
-        <div className="login-petal login-petal--four" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--five" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--six" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--seven" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--eight" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--nine" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--ten" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--eleven" aria-hidden="true" />
-        <div className="login-petal login-petal--leaf login-petal--twelve" aria-hidden="true" />
-        <div className="login-bloom login-bloom--one" aria-hidden="true">
-          <FloralAccent />
-        </div>
-        <div className="login-bloom login-bloom--two" aria-hidden="true">
-          <FloralAccent />
-        </div>
-
-      </div>
+    <main data-auth-interaction-root className="login-scene relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8 text-white sm:px-6 sm:py-12">
+      <AuthFlowerBackdrop scene="login" />
+      <AuthInteractionEffects />
 
       <section className="login-glass-panel relative z-10 w-full max-w-[510px] overflow-hidden rounded-[28px] px-5 py-7 sm:rounded-[32px] sm:px-10 sm:py-10 lg:px-12 lg:py-11">
         <div className="login-glass-inner pointer-events-none absolute inset-0" />
@@ -286,22 +256,6 @@ function ArrowRightIcon({ className }: { className?: string }) {
       className={className}
     >
       <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  )
-}
-
-function FloralAccent() {
-  return (
-    <svg viewBox="0 0 120 150" fill="none" className="h-full w-full">
-      <path d="M57 69c-7 22-4 44 3 71" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M58 104c-13-15-26-17-35-15 6 13 18 21 37 19M60 122c10-15 23-19 34-18-5 14-17 23-32 24" stroke="currentColor" strokeWidth="1.3" />
-      <g transform="translate(57 47)" stroke="currentColor" strokeWidth="1.2">
-        <ellipse cy="-20" rx="8" ry="17" />
-        <ellipse cy="-20" rx="8" ry="17" transform="rotate(45)" />
-        <ellipse cy="-20" rx="8" ry="17" transform="rotate(90)" />
-        <ellipse cy="-20" rx="8" ry="17" transform="rotate(135)" />
-        <circle r="7" fill="currentColor" fillOpacity=".22" />
-      </g>
     </svg>
   )
 }

@@ -1,7 +1,7 @@
 // Service Worker for Yabes Atelier PWA
 // Caches app shell for offline access
 
-const CACHE_NAME = 'yabes-atelier-v4'
+const CACHE_NAME = 'yabes-atelier-v5'
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
