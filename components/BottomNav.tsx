@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -19,8 +19,27 @@ export default function BottomNav() {
   const { user } = useAuth()
   const [openMoreOnPath, setOpenMoreOnPath] = useState<string | null>(null)
   const moreOpen = openMoreOnPath === pathname
+  const navContainerRef = useRef<HTMLDivElement>(null)
   const language = user?.language ?? 'id'
   const t = (key: Parameters<typeof translate>[1]) => translate(language, key)
+
+  useEffect(() => {
+    if (!moreOpen) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!navContainerRef.current?.contains(event.target as Node)) setOpenMoreOnPath(null)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpenMoreOnPath(null)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [moreOpen])
 
   const navItems = [
     { href: '/', label: t('nav.home'), icon: HomeIcon },
@@ -46,10 +65,11 @@ export default function BottomNav() {
         paddingRight: 'max(env(safe-area-inset-right), 0.75rem)',
       }}
     >
-      <nav
-        aria-label="Main navigation"
-        className="app-glass-surface app-bottom-dock relative mx-auto flex w-full max-w-2xl items-stretch justify-around gap-0.5 px-1.5 py-1.5 sm:px-2"
-      >
+      <div ref={navContainerRef} className="relative mx-auto w-full max-w-2xl">
+        <nav
+          aria-label="Main navigation"
+          className="app-glass-surface app-bottom-dock relative flex w-full items-stretch justify-around gap-0.5 px-1.5 py-1.5 sm:px-2"
+        >
         {navItems.map((item) => {
           const isActive = item.href === '/'
             ? pathname === '/'
@@ -80,8 +100,10 @@ export default function BottomNav() {
         })}
         <button
           type="button"
+          aria-label={t('nav.more')}
           aria-expanded={moreOpen}
           aria-haspopup="menu"
+          aria-controls="bottom-nav-more-menu"
           onClick={() => setOpenMoreOnPath(moreOpen ? null : pathname)}
           className={`nav-dock-item flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-300 ${
             isMoreActive || moreOpen
@@ -95,12 +117,13 @@ export default function BottomNav() {
           </span>
           {(isMoreActive || moreOpen) && <span className="nav-dock-indicator" aria-hidden="true" />}
         </button>
-      </nav>
-      {moreOpen && (
-        <div
-          role="menu"
-          className="app-glass-surface nav-dock-more-menu absolute bottom-[calc(100%+0.75rem)] right-3 z-10 w-52 rounded-2xl p-2 sm:right-5"
-        >
+        </nav>
+        {moreOpen && (
+          <div
+            id="bottom-nav-more-menu"
+            role="menu"
+            className="app-glass-surface nav-dock-more-menu rounded-2xl p-2"
+          >
           {moreItems.map((item) => {
             if (!item.href) {
               return (
@@ -169,8 +192,9 @@ export default function BottomNav() {
               </Link>
             )
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

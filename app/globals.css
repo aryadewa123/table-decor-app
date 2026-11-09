@@ -1527,6 +1527,14 @@ html {
 .nav-dock-menu-item {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.nav-dock-menu-item:hover {
+  transform: translateX(2px);
 }
 
 .nav-dock-menu-item:active {
@@ -1534,7 +1542,12 @@ html {
 }
 
 .nav-dock-more-menu {
-  animation: nav-menu-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.75rem);
+  z-index: 50;
+  width: min(13rem, calc(100vw - 1.5rem));
+  animation: nav-menu-enter 420ms cubic-bezier(0.2, 1.35, 0.35, 1) both;
   transform-origin: bottom right;
 }
 
@@ -1547,8 +1560,9 @@ html {
 }
 
 @keyframes nav-menu-enter {
-  from { opacity: 0; transform: translateY(8px) scale(0.94); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(14px) scale(0.93); }
+  72% { opacity: 1; transform: translateY(-2px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .nav-dock-icon {
@@ -1683,5 +1697,9 @@ html {
   .nav-dock-menu-item:active,
   .nav-dock-more-menu {
     animation: none !important;
+  }
+
+  .nav-dock-menu-item:hover {
+    transform: none !important;
   }
 }
